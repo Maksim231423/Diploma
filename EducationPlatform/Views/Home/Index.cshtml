@@ -1,28 +1,109 @@
 ﻿@model List<EducationPlatform.Models.Course>
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Головна сторінка";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+<div class="container-fluid bg-dark text-white py-5 mb-5 border-bottom border-secondary shadow-sm">
+    <div class="container text-center py-5">
+
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <h1 class="display-4 fw-bold mb-3">Вітаю, <span class="text-primary">@User.Identity?.Name</span>! 👋</h1>
+            <p class="lead text-secondary mb-4">Готовий продовжити своє навчання та здобути нові навички?</p>
+        }
+        else
+        {
+            <h1 class="display-4 fw-bold mb-3">Вітаю на <span class="text-primary">EducationPlatform</span>! 🚀</h1>
+            <p class="lead text-secondary mb-4">Знайди свій ідеальний курс, навчайся у професіоналів та будуй кар'єру в IT.</p>
+        }
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="input-group input-group-lg shadow-sm">
+                    <input type="text" class="form-control bg-dark text-white border-secondary" placeholder="Який курс ви шукаєте? (напр. C#)">
+                    <button class="btn btn-primary px-4" type="button">🔍 Знайти</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="container">
+
+    <div class="row text-center mb-5 pb-4 border-bottom border-secondary">
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="display-6 mb-2">💻</div>
+            <h5 class="text-white">Практичні завдання</h5>
+            <p class="text-secondary small">Мінімум води, максимум коду та реальних проектів.</p>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="display-6 mb-2">⏱️</div>
+            <h5 class="text-white">Доступ 24/7</h5>
+            <p class="text-secondary small">Навчайтесь у власному темпі з будь-якої точки світу.</p>
+        </div>
+        <div class="col-md-4">
+            <div class="display-6 mb-2">📓</div>
+            <h5 class="text-white">Практика</h5>
+            <p class="text-secondary small">Відпрацюйте свої знання на домашніх завданнях.</p>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-white">🔥 Популярні курси</h2>
+        <a href="#" class="text-info text-decoration-none">Всі курси ➔</a>
+    </div>
+
     <div class="row">
-        @foreach (var course in Model)
+        @if (Model != null && Model.Any())
         {
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <img src="@course.ImageUrl" class="card-img-top" alt="@course.Title">
-                    <div class="card-body">
-                        <h5 class="card-title">@course.Title</h5>
-                        <p class="card-text">@course.Price ₴</p>
-                        <a asp-controller="Home" asp-action="CourseDetails" asp-route-id="@course.Id" class="btn btn-primary">
-                            Детальніше
-                        </a>
+            @foreach (var course in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card bg-dark text-white border-secondary h-100 shadow-sm course-card">
+
+                        <img src="@(string.IsNullOrEmpty(course.ImageUrl) ? "https://via.placeholder.com/600x400/343a40/ffffff?text=Курс" : course.ImageUrl)"
+                             class="card-img-top border-bottom border-secondary"
+                             alt="@course.Title"
+                             style="height: 200px; object-fit: cover;">
+
+                        <div class="card-body d-flex flex-column">
+                            <div class="badge bg-warning text-dark w-25 mb-2">C# / .NET</div>
+                            <h5 class="card-title fw-bold">@course.Title</h5>
+                            <p class="card-text text-secondary mb-4 flex-grow-1">
+                                @(course.Description?.Length > 80 ? course.Description.Substring(0, 80) + "..." : course.Description)
+                            </p>
+
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="fs-5 text-primary fw-bold">@course.Price ₴</span>
+                                <a asp-controller="Home" asp-action="CourseDetails" asp-route-id="@course.Id" class="btn btn-sm btn-outline-light px-3">
+                                    Детальніше
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5">
+                <p class="text-secondary fs-5">Курсів поки що немає. Загляньте пізніше!</p>
             </div>
         }
     </div>
 </div>
+
+<style>
+    .course-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.5) !important;
+            border-color: #0dcaf0 !important; /* Трохи підсвічуємо бордер при наведенні */
+        }
+</style>

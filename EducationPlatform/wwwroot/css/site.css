@@ -218,3 +218,77 @@ footer {
         order: 3; /* Логін в самому низу на мобілці */
     }
 }
+
+/* Стилі для дзвіночка та сповіщень */
+.notification-dropdown {
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.bell-btn {
+    background: none;
+    border: none;
+    position: relative;
+    padding: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.bell-icon svg {
+    fill: white;
+    transition: fill 0.2s;
+}
+
+.bell-btn:hover .bell-icon svg {
+    fill: #cccccc;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px; /* Піднімаємо трохи вище іконки */
+    right: -8px; /* Зсуваємо вправо відносно іконки */
+    background-color: #ff4444;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 50%;
+    padding: 2px 5px;
+    border: 2px solid #222; /* Колір шапки, щоб зробити красивий виріз */
+    line-height: 1; /* Щоб цифра стояла ідеально по центру гуртка */
+}
+
+.dropdown-menu-notifications {
+    width: 320px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    margin-top: 10px !important;
+}
+
+.notification-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 14px;
+    white-space: normal; /* Дозволяє тексту переноситись на новий рядок */
+}
+
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+
+    .notification-item.unread {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+
+.notification-date {
+    font-size: 11px;
+    color: #888;
+    display: block;
+    margin-top: 5px;
+    font-weight: normal;
+}

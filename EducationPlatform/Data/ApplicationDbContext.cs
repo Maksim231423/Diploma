@@ -15,5 +15,6 @@ namespace EducationPlatform.Data
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Purchase> Purchases { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
     }
 }
