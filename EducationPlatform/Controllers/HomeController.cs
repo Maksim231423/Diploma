@@ -23,9 +23,15 @@ namespace EducationPlatform.Controllers
             return View(courses);
         }
 
-        public IActionResult Privacy()
+        public IActionResult About()
         {
             return View();
+        }
+        public async Task<IActionResult> Courses()
+        {
+            // Запит до бази: "Дай мені всі курси"
+            var courses = await _context.Courses.ToListAsync();
+            return View(courses);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

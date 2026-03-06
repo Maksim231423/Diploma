@@ -25,5 +25,8 @@ namespace EducationPlatform.Models
         public List<Lesson> Lessons { get; set; } = new List<Lesson>();
 
         public List<Comment> Comments { get; set; } = new List<Comment>();
+
+        // Навігаційна властивість: один курс може мати багато тегів
+        public List<Tag> Tags { get; set; } = new List<Tag>();
     }
 }
