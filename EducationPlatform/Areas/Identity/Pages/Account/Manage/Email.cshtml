@@ -1,0 +1,50 @@
+﻿@page
+@model EmailModel
+@{
+    ViewData["Title"] = "Керування Email";
+    ViewData["ActivePage"] = ManageNavPages.Email;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card bg-dark text-white border-secondary shadow-sm h-100">
+            <div class="card-header border-secondary">
+                <h5 class="mb-0">📧 Зміна електронної пошти</h5>
+            </div>
+            <div class="card-body p-4">
+                <form id="email-form" method="post">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="Email" class="form-label text-secondary">Теперішній Email</label>
+                        <input asp-for="Email" class="form-control bg-dark text-white border-secondary" disabled />
+                    </div>
+
+                    <div class="row align-items-end mb-4">
+                        <div class="col-md-8">
+                            <label asp-for="Input.NewEmail" class="form-label text-secondary">Новий Email</label>
+                            <input asp-for="Input.NewEmail" class="form-control bg-dark text-white border-secondary" placeholder="new@example.com" />
+                            <span asp-validation-for="Input.NewEmail" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mt-3 mt-md-0">
+                            <button id="email-verification" type="submit" asp-page-handler="SendVerificationEmail" class="btn btn-outline-info w-100">Відправити код</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-5 w-50">
+                        <label class="form-label text-secondary">Код (відправлений на email)</label>
+                        <input type="text" class="form-control bg-dark text-white border-secondary" placeholder="123456" />
+                    </div>
+
+                    <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="btn btn-primary px-4">Зберегти зміни</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

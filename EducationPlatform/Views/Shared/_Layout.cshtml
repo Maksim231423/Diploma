@@ -48,8 +48,10 @@
                 }
                 else
                 {
-                    <a asp-area="Identity" asp-page="/Account/Register" class="nav-link">Реєстрація</a>
-                    <a asp-area="Identity" asp-page="/Account/Login" class="nav-link">Вхід</a>
+                    <div class="d-flex align-items-center">
+                        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-light me-3 px-4 rounded-pill">Вхід</a>
+                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary px-4 rounded-pill shadow-sm">Реєстрація</a>
+                    </div>
                 }
             </div>
         </div>

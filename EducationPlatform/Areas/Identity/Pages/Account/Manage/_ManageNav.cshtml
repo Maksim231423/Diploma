@@ -12,4 +12,12 @@
     <li class="nav-item">
         <a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext) text-white" id="change-password" asp-page="./ChangePassword">🔑 Зміна пароля</a>
     </li>
+
+    <li class="nav-item mt-4 border-top border-secondary pt-3">
+        <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+            <button id="logout" type="submit" class="nav-link text-danger border-0 bg-transparent w-100 text-start">
+                Вийти з акаунту
+            </button>
+        </form>
+    </li>
 </ul>
