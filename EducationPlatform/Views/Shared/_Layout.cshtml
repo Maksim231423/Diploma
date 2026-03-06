@@ -1,0 +1,75 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ITskill</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-section">
+                <a class="logo-text" asp-controller="Home" asp-action="Index">ITskill</a>
+            </div>
+
+            <nav class="center-nav">
+                <a asp-controller="Home" asp-action="Index" class="nav-link">ГОЛОВНА</a>
+                <a asp-controller="Home" asp-action="Privacy" class="nav-link">ПРО НАС</a>
+                <a asp-controller="Home" asp-action="Index" class="nav-link">КУРСИ</a>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-area="Admin" asp-controller="Courses" asp-action="Index" class="nav-link" style="color: #ff4444; border: 1px solid #ff4444; border-radius: 5px; padding: 5px 10px;">
+                        АДМІНКА
+                    </a>
+                }
+            </nav>
+
+            <div class="right-actions">
+                <div class="bell-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20">
+                        <path fill="white" d="M320 64C302.3 64 288 78.3 288 96L288 99.2C215 114 160 178.6160 256L160 277.7C160 325.8 143.6 372.5 113.6 410.1L103.8 422.3C98.7 428.6 96 436.4 96 444.5C96 464.1 111.9 480 131.5 480L508.4 480C528 480 543.9 464.1 543.9 444.5C543.9 436.4 541.2 428.6 536.1 422.3L526.3 410.1C496.4 372.5 480 325.8 480 277.7L480 256C480 178.6 425 114 352 99.2L352 96C352 78.3 337.7 64 320 64zM258 528C265.1 555.6 290.2 576 320 576C349.8 576 374.9 555.6 382 528L258 528z" />
+                    </svg>
+                </div>
+
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="nav-link" title="Manage">
+                        <svg width="40" height="40" fill="currentColor" viewBox="0 0 640 640">
+                            <path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z" />
+                        </svg>
+                    </a>
+                }
+                else
+                {
+                    <a asp-area="Identity" asp-page="/Account/Register" class="nav-link">Реєстрація</a>
+                    <a asp-area="Identity" asp-page="/Account/Login" class="nav-link">Вхід</a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <div class="container main-content">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer>
+        <div class="container">
+            &copy; 2024 - ITskill - Всі права захищено
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

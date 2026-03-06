@@ -1,0 +1,220 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pushster&display=swap');
+
+/* --- ЗАГАЛЬНІ --- */
+body {
+    background-color: #1E1E1E;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- ХЕДЕР (НОВА СТРУКТУРА) --- */
+header {
+    background: #16161c;
+    border-bottom: 3px solid #FF6347; /* Помаранчева лінія */
+    padding: 0 40px; /* Відступи з боків */
+    height: 80px; /* Фіксована висота шапки */
+    display: flex;
+    align-items: center; /* Вертикальне вирівнювання */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.header-content {
+    width: 100%;
+    display: flex;
+    justify-content: space-between; /* Розподіляє: Ліву, Центральну і Праву частини */
+    align-items: center;
+}
+
+/* 1. Логотип */
+.logo-text {
+    font-family: 'Pushster', cursive;
+    font-size: 32px;
+    color: #ffffff;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.logo-text:hover {
+    color: #FF6347;
+    text-shadow: 0 0 10px rgba(255, 99, 71, 0.5);
+}
+
+/* 2. Центральне меню */
+.center-nav {
+    display: flex;
+    gap: 40px; /* Відстань між посиланнями */
+    position: absolute; /* Хитрість, щоб меню було точно по центру екрану */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.center-nav .nav-link {
+    color: #ccc;
+    text-decoration: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 1px;
+    transition: color 0.3s;
+}
+
+.center-nav .nav-link:hover {
+    color: #FF6347;
+}
+
+/* 3. Права частина (Дзвіночок + Вхід) */
+.right-actions {
+    display: flex;
+    align-items: center;
+    /* Прибираємо gap тут, бо будемо регулювати відступи точніше в елементах */
+}
+
+/* --- ДЗВІНОЧОК --- */
+.bell-icon {
+    margin-right: 30px; /* Більший відступ від кнопок */
+    display: flex;
+    align-items: center;
+}
+
+.bell-icon svg {
+    fill: #fff;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Плавна пружиниста анімація */
+}
+
+/* Ефект при наведенні на дзвіночок */
+.bell-icon svg:hover {
+    fill: #FF6347;
+    transform: rotate(15deg) scale(1.2); /* Поворот і збільшення */
+    filter: drop-shadow(0 0 5px rgba(255, 99, 71, 0.8)); /* Світіння */
+}
+
+/* --- КНОПКИ ВХОДУ (AUTH) --- */
+.auth-buttons .auth-nav {
+    display: flex; /* Ставимо в ряд! */
+    align-items: center;
+    gap: 15px; /* Відстань між кнопками Register і Login */
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Спільні стилі для кнопок */
+.btn-custom {
+    display: inline-block;
+    padding: 8px 20px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 25px; /* Закруглені краї */
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+/* Кнопка REGISTER (Прозора з рамкою) */
+.btn-register {
+    color: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+}
+
+.btn-register:hover {
+    border-color: #ffffff;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Кнопка LOGIN (Помаранчева заливка) */
+.btn-login {
+    background-color: #FF6347; /* Твій помаранчевий */
+    color: white;
+    border: 2px solid #FF6347;
+    box-shadow: 0 4px 10px rgba(255, 99, 71, 0.3); /* Тінь */
+}
+
+.btn-login:hover {
+    background-color: #e04a2f; /* Трохи темніший при наведенні */
+    border-color: #e04a2f;
+    transform: translateY(-2px); /* Кнопка підстрибує */
+    box-shadow: 0 6px 15px rgba(255, 99, 71, 0.5);
+}
+
+/* Кнопка ВИХІД (для залогінених) */
+.btn-logout {
+    background: transparent;
+    border: 1px solid #FF6347;
+    color: #FF6347;
+    cursor: pointer;
+}
+
+.btn-logout:hover {
+    background: #FF6347;
+    color: white;
+}
+
+/* Кнопки входу (виправляємо список ul/li від Identity) */
+.auth-buttons ul {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Відстань між Register і Login */
+    margin: 0;
+    padding: 0;
+    list-style: none; /* Прибираємо крапки списку */
+}
+
+.auth-buttons .nav-link {
+    color: white !important;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0 !important; /* Прибираємо стандартні відступи bootstrap */
+}
+
+.auth-buttons .nav-link:hover {
+    color: #FF6347 !important;
+}
+
+/* --- КОНТЕНТ --- */
+.container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 15px;
+}
+
+/* Футер */
+footer {
+    background: #16161c;
+    color: #777;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: auto;
+    border-top: 1px solid #333;
+}
+
+/* --- АДАПТИВНІСТЬ (Для мобілок) --- */
+@media (max-width: 900px) {
+    header {
+        height: auto;
+        padding: 15px 20px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .center-nav {
+        position: static; /* Скасовуємо центрування для мобілки */
+        transform: none;
+        order: 2; /* Ставимо меню після логотипу */
+    }
+
+    .right-actions {
+        order: 3; /* Логін в самому низу на мобілці */
+    }
+}

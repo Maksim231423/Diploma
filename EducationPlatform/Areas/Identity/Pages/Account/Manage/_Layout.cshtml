@@ -1,0 +1,24 @@
+﻿@{
+    // Кажемо профілю використовувати головну шапку сайту
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="text-white mb-4">Особистий кабінет</h2>
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-body p-2">
+                    <partial name="_ManageNav" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            @RenderBody()
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+}

@@ -1,0 +1,35 @@
+﻿@model IEnumerable<EducationPlatform.Models.Course>
+
+@{
+    ViewData["Title"] = "Адмін - Курси";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Управління курсами</h1>
+        <a asp-action="Create" class="btn btn-success">+ Додати новий курс</a>
+    </div>
+
+    <table class="table table-dark table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Назва</th>
+                <th>Ціна</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Title</td>
+                    <td>@item.Price ₴</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary">Редагувати</button>
+                        <button class="btn btn-sm btn-danger">Видалити</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
