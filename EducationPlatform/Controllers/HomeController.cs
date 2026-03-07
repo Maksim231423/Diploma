@@ -56,15 +56,15 @@ namespace EducationPlatform.Controllers
 
         public async Task<IActionResult> Lesson(int id)
         {
-            var lesson = await _context.Lessons
-                .Include(l => l.Course) // ѕ≥дт€гуЇмо ≥нфо про курс (щоб знати назву курсу)
-                .FirstOrDefaultAsync(l => l.Id == id);
+            // ЎукаЇмо урок у баз≥ за його Id
+            var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.Id == id);
 
             if (lesson == null)
             {
-                return NotFound();
+                return NotFound(); // якщо уроку немаЇ Ч покажемо помилку 404
             }
 
+            // ѕередаЇмо знайдений урок на стор≥нку
             return View(lesson);
         }
     }

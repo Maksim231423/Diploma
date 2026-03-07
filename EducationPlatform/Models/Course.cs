@@ -17,7 +17,7 @@ namespace EducationPlatform.Models
         public decimal Price { get; set; }
 
         [Display(Name = "Картинка курсу")]
-        public string? ImageUrl { get; set; } // <--- ОСЬ ЦЬОГО НЕ ВИСТАЧАЛО
+        public string? ImageUrl { get; set; }
 
         [Display(Name = "Дата створення")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
