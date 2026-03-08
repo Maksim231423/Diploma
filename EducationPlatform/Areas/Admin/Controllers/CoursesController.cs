@@ -10,39 +10,28 @@ namespace EducationPlatform.Areas.Admin.Controllers
     [Authorize(Roles = "Admin")] // Надає доступ лише адміну
     public class CoursesController : Controller
     {
-        private readonly ApplicationDbContext _context;
-
-        public CoursesController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        // 1. Показати список курсів
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Courses.ToListAsync());
-        }
-
-        // 2. Показати сторінку "Створити курс"
-        public IActionResult Create()
+        // 1. Головна сторінка (Дашборд)
+        public IActionResult Index()
         {
             return View();
         }
 
-        // 3. Зберегти новий курс (коли натиснеш кнопку Save)
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Description,Price,ImageUrl")] Course course)
+        // 2. Сторінка "Курси, Уроки та Теги"
+        public IActionResult Courses()
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(course);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(course);
+            return View();
         }
 
-        // Тут пізніше додамо Edit і Delete, поки вистачить Create
+        // 3. Сторінка "Домашні завдання"
+        public IActionResult Homeworks()
+        {
+            return View();
+        }
+
+        // 4. Сторінка "Email розсилка"
+        public IActionResult Newsletter()
+        {
+            return View();
+        }
     }
 }

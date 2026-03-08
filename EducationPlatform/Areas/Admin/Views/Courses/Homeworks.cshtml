@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "Домашні завдання";
+}
+
+<h2 class="text-white mb-4">📝 Перевірка завдань</h2>
+
+<ul class="nav nav-tabs border-secondary mb-4">
+    <li class="nav-item">
+        <a class="nav-link active bg-dark text-white border-secondary border-bottom-0 fw-bold" href="#">Нові (3)</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-secondary border-0" href="#">Відправлені відгуки</a>
+    </li>
+</ul>
+
+<div class="card bg-dark border-secondary shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead class="table-active border-secondary">
+                    <tr>
+                        <th class="py-3 px-4">Студент</th>
+                        <th class="py-3">Урок</th>
+                        <th class="py-3">Посилання на код</th>
+                        <th class="py-3 text-end px-4">Дія</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="px-4 py-3">
+                            <div class="text-white fw-bold">Іван Величко</div>
+                            <div class="text-secondary small">07.03.2026 14:30</div>
+                        </td>
+                        <td>
+                            <div class="text-info">Основи C#</div>
+                            <div class="text-secondary small">Урок 1: Змінні та типи</div>
+                        </td>
+                        <td>
+                            <div class="input-group input-group-sm w-75">
+                                <input type="text" class="form-control bg-dark text-secondary border-secondary" value="https://github.com/ivan/hw1" readonly>
+                                <button class="btn btn-outline-secondary" type="button">Відкрити</button>
+                            </div>
+                        </td>
+                        <td class="text-end px-4">
+                            <button class="btn btn-success fw-bold px-3" data-bs-toggle="modal" data-bs-target="#feedbackModal">💬 Залишити відгук</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="feedbackModalLabel">Відгук для: Іван Величко</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="text-secondary mb-3">Основи C# - Урок 1: Змінні та типи</p>
+
+                <div class="mb-3">
+                    <label class="form-label text-light">Повідомлення ментора</label>
+                    <textarea class="form-control bg-dark text-white border-secondary" rows="5" placeholder="Наприклад: Ти чудово попрацював зі змінними, все виконано правильно!"></textarea>
+                    <div class="form-text text-secondary mt-2">
+                        Цей текст буде відправлено студенту на email (ivan.v@gmail.com). Після відправки завдання зникне зі списку нових.
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Скасувати</button>
+                <button type="button" class="btn btn-primary px-4 fw-bold">Відправити на Email 🚀</button>
+            </div>
+
+        </div>
+    </div>
+</div>
