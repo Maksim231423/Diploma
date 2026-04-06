@@ -72,14 +72,16 @@ namespace EducationPlatform.Areas.Identity.Pages.Account
         {
             [Required(ErrorMessage = "Введіть ваше ім'я")]
             [Display(Name = "Ім'я")]
+            [RegularExpression(@"^[a-zA-Zа-яА-ЯіІїЇєЄ]+$",
+            ErrorMessage = "Ім'я може містити тільки літери")]
             public string UserName { get; set; }
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Поле Email є обов'язковим")]
+            [EmailAddress(ErrorMessage = "Введіть коректну адресу електронної пошти")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
@@ -87,10 +89,10 @@ namespace EducationPlatform.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [Required(ErrorMessage = "Поле Пароль є обов'язковим")]
+            [StringLength(100, ErrorMessage = "{0} має містити мінімум {2} і максимум {1} символів", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [Display(Name = "Пароль")]
             public string Password { get; set; }
 
             /// <summary>
@@ -98,8 +100,8 @@ namespace EducationPlatform.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Display(Name = "Підтвердження пароля")]
+            [Compare("Password", ErrorMessage = "Пароль і підтвердження пароля не співпадають")]
             public string ConfirmPassword { get; set; }
         }
 
@@ -114,17 +116,22 @@ namespace EducationPlatform.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
 
-                await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
+                // ВИПРАВЛЕНО: Використовуємо Input.Email замість Input.UserName, бо логіном є пошта
+                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    // НОВЕ: Одразу даємо користувачу роль Студента!
+                    await _userManager.AddToRoleAsync(user, "Student");
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -135,8 +142,9 @@ namespace EducationPlatform.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    // ВИПРАВЛЕНО: Переклали тему та текст листа на українську
+                    await _emailSender.SendEmailAsync(Input.Email, "Підтвердження електронної пошти",
+                        $"Вітаємо на ITskill! Будь ласка, підтвердіть ваш акаунт, <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>натиснувши на це посилання</a>.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -148,8 +156,11 @@ namespace EducationPlatform.Areas.Identity.Pages.Account
                         return LocalRedirect(returnUrl);
                     }
                 }
+
                 foreach (var error in result.Errors)
                 {
+                    // Identity генерує помилки англійською (напр. "Password requires uppercase").
+                    // Якщо захочеш, пізніше ми зможемо їх теж українізувати через IdentityErrorDescriber
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }

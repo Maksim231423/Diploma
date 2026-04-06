@@ -6,7 +6,7 @@ namespace EducationPlatform
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +16,8 @@ namespace EducationPlatform
                 options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 0))));
             object value = builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
-                .AddRoles<IdentityRole>() // <--- �� ������ ��� ����� (������� �������� �����)
+            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>() // Важливо для роботи ролей
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
 
@@ -53,6 +53,23 @@ namespace EducationPlatform
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.MapRazorPages(); // �� ��� Identity (Login/Register), �� �������
+
+
+            // Автоматичне створення ролей та Адміна при запуску
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    await EducationPlatform.Data.DbInitializer.SeedRolesAndAdminAsync(services);
+                }
+                catch (Exception ex)
+                {
+                    // Якщо раптом щось піде не так (наприклад, немає підключення до БД), помилка виведеться в консоль
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "Помилка під час ініціалізації ролей у базі даних.");
+                }
+            }
 
             app.Run();
         }

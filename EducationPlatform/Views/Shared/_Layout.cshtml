@@ -24,7 +24,7 @@
                 <a asp-controller="Home" asp-action="About" class="nav-link">ПРО НАС</a>
                 <a asp-controller="Home" asp-action="Courses" class="nav-link">КУРСИ</a>
 
-                @if (User.IsInRole("Admin"))
+                @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
                 {
                     <a asp-area="Admin" asp-controller="Courses" asp-action="Index" class="nav-link" style="color: #ff4444; border: 1px solid #ff4444; border-radius: 5px; padding: 5px 10px;">
                         АДМІНКА

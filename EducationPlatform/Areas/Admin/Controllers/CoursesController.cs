@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EducationPlatform.Areas.Admin.Controllers
 {
     [Area("Admin")] // Кажемо, що це зона адміна
-    [Authorize(Roles = "Admin")] // Надає доступ лише адміну
+    [Authorize(Roles = "SuperAdmin, Admin")] // Надає доступ лише адміну
     public class CoursesController : Controller
     {
         // 1. Головна сторінка (Дашборд)

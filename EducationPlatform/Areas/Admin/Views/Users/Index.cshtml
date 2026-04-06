@@ -1,0 +1,68 @@
+﻿@model List<EducationPlatform.Models.ViewModels.UserRoleViewModel>
+
+@{
+    ViewData["Title"] = "Керування персоналом";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-white m-0">👥 Керування персоналом</h2>
+        <span class="badge bg-danger fs-6">Рівень доступу: SuperAdmin</span>
+    </div>
+
+    <div class="card bg-dark border-secondary shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead class="table-active border-secondary">
+                        <tr>
+                            <th class="ps-4">Email користувача</th>
+                            <th>Поточна роль</th>
+                            <th class="text-end pe-4">Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 text-info fw-bold">@user.Email</td>
+                                <td>
+                                    @if (user.Roles.Contains("SuperAdmin"))
+                                    {
+                                        <span class="badge bg-danger px-3 py-2">SuperAdmin</span>
+                                    }
+                                    else if (user.Roles.Contains("Admin"))
+                                    {
+                                        <span class="badge bg-primary px-3 py-2">Admin (Викладач)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary px-3 py-2 text-dark border border-secondary text-white">Student</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    @if (user.Roles.Contains("SuperAdmin"))
+                                    {
+                                        <span class="text-muted small me-2">Головний адміністратор (Не редагується)</span>
+                                    }
+                                    else if (user.Roles.Contains("Admin"))
+                                    {
+                                        <form asp-action="RemoveAdminRole" asp-route-userId="@user.UserId" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-warning">Забрати права викладача</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="AddAdminRole" asp-route-userId="@user.UserId" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-success">Зробити викладачем</button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
