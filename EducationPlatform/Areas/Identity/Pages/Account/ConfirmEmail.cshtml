@@ -1,0 +1,31 @@
+﻿@page
+@model ConfirmEmailModel
+@{
+    ViewData["Title"] = "Пошту підтверджено";
+    Layout = "~/Views/Shared/_LayoutAuth.cshtml"; // Використовуємо твій темний фон
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-dark text-white shadow-lg border-success">
+                <div class="card-body p-5 text-center">
+
+                    <div class="mb-4">
+                        <span style="font-size: 4rem;">✅</span>
+                    </div>
+
+                    <h2 class="mb-3">Електронну пошту підтверджено!</h2>
+
+                    <p class="text-secondary mb-4 fs-5">
+                        Дякуємо! Ваш акаунт на платформі ITskill успішно активовано. Тепер ви маєте повний доступ до всіх матеріалів.
+                    </p>
+
+                    <a asp-page="./Login" class="btn btn-lg btn-success px-5">
+                        Увійти в акаунт
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

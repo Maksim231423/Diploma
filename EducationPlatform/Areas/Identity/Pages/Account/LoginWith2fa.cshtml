@@ -1,0 +1,39 @@
+﻿@page
+@model LoginWith2faModel
+@{
+    ViewData["Title"] = "Перевірка безпеки";
+    Layout = "~/Views/Shared/_LayoutAuth.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card bg-dark text-white shadow-lg border-secondary">
+                <div class="card-header text-center border-secondary">
+                    <h2>🛡️ Введіть код</h2>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-center text-secondary mb-4">
+                        Ми відправили 6-значний код на вашу електронну пошту. Будь ласка, введіть його нижче.
+                    </p>
+                    <form method="post" asp-route-returnUrl="@Model.ReturnUrl">
+                        <input asp-for="RememberMe" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.TwoFactorCode" class="form-control bg-dark text-white border-secondary text-center fs-4 letter-spacing-2" autocomplete="off" placeholder="123456" />
+                            <label asp-for="Input.TwoFactorCode" class="text-secondary">Код підтвердження</label>
+                            <span asp-validation-for="Input.TwoFactorCode" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-lg btn-success w-100">Підтвердити вхід</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

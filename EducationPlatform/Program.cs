@@ -1,5 +1,7 @@
 using EducationPlatform.Data;
+using EducationPlatform.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace EducationPlatform
@@ -16,10 +18,20 @@ namespace EducationPlatform
                 options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 0))));
             object value = builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = true; // Обов'язкове підтвердження для входу
+                // ДОЗВОЛЯЄМО УКРАЇНСЬКУ МОВУ ТА ПРОБІЛИ В ІМЕНІ
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+            })
                 .AddRoles<IdentityRole>() // Важливо для роботи ролей
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders() // <--- Цей метод сам додає всі потрібні генератори кодів (включно з Email)
+                .AddErrorDescriber<EducationPlatform.Services.CustomIdentityErrorDescriber>();
             builder.Services.AddControllersWithViews();
+
+            //Тепер є сервіс для відправкли листа, який використовує клас EmailSender
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
 
             var app = builder.Build();
 

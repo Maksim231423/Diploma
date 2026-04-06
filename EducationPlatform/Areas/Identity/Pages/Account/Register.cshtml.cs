@@ -91,7 +91,7 @@ namespace EducationPlatform.Areas.Identity.Pages.Account
             /// </summary>
             [Required(ErrorMessage = "Поле Пароль є обов'язковим")]
             [StringLength(100, ErrorMessage = "{0} має містити мінімум {2} і максимум {1} символів", MinimumLength = 6)]
-            [DataType(DataType.Password)]
+            [DataType(DataType.Password, ErrorMessage = "Паролі повинні містити принаймні один символ, який не є буквено-цифровим\r\nПаролі повинні містити принаймні одну цифру ('0'-'9')\r\nПаролі повинні містити принаймні одну велику літеру")]
             [Display(Name = "Пароль")]
             public string Password { get; set; }
 
@@ -121,10 +121,11 @@ namespace EducationPlatform.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
-                // ВИПРАВЛЕНО: Використовуємо Input.Email замість Input.UserName, бо логіном є пошта
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-                var result = await _userManager.CreateAsync(user, Input.Password);
+                user.TwoFactorEnabled = true;
+
+                var result = await _userManager.CreateAsync(user, Input.Password); // Автоматично вмикаємо перевірку поштою
 
                 if (result.Succeeded)
                 {

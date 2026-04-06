@@ -32,7 +32,8 @@ namespace EducationPlatform.Data
                 {
                     UserName = superAdminEmail,
                     Email = superAdminEmail,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    TwoFactorEnabled = true
                 };
 
                 var createPowerUser = await userManager.CreateAsync(superAdminUser, superAdminPassword);
