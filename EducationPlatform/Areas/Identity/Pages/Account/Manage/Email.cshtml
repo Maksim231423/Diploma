@@ -34,8 +34,9 @@
                     </div>
 
                     <div class="mb-5 w-50">
-                        <label class="form-label text-secondary">Код (відправлений на email)</label>
-                        <input type="text" class="form-control bg-dark text-white border-secondary" placeholder="123456" />
+                        <label asp-for="Input.VerificationCode" class="form-label text-secondary">Код підтвердження</label>
+                        <input asp-for="Input.VerificationCode" class="form-control bg-dark text-white border-secondary text-center fs-5" placeholder="123456" />
+                        <span asp-validation-for="Input.VerificationCode" class="text-danger"></span>
                     </div>
 
                     <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="btn btn-primary px-4">Зберегти зміни</button>

@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Оплата успішна";
+}
+
+<div class="container mt-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-dark text-white border-success shadow-lg">
+                <div class="card-body p-5">
+                    <span style="font-size: 4rem;">🎉</span>
+                    <h2 class="mt-3 mb-4 text-success">Оплата пройшла успішно!</h2>
+
+                    <p class="fs-5 text-secondary">
+                        Дякуємо за покупку. Номер вашого замовлення: <br />
+                        <strong class="text-white">@ViewBag.OrderId</strong>
+                    </p>
+
+                    <p class="mb-5">
+                        Курс вже додано до вашого особистого кабінету.
+                    </p>
+
+                    <a href="/StudentCabinet" class="btn btn-success btn-lg px-5">
+                        Перейти до навчання
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

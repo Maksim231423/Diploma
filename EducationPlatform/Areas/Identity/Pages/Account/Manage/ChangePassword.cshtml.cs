@@ -1,127 +1,128 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
-
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 
-namespace EducationPlatform.Areas.Identity.Pages.Account.Manage
+public class ChangePasswordModel : PageModel
 {
-    public class ChangePasswordModel : PageModel
+    private readonly UserManager<IdentityUser> _userManager;
+    private readonly SignInManager<IdentityUser> _signInManager;
+    private readonly IEmailSender _emailSender;
+
+    public ChangePasswordModel(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IEmailSender emailSender)
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly ILogger<ChangePasswordModel> _logger;
+        _userManager = userManager;
+        _signInManager = signInManager;
+        _emailSender = emailSender;
+    }
 
-        public ChangePasswordModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
-            ILogger<ChangePasswordModel> logger)
+    [BindProperty]
+    public InputModel Input { get; set; }
+
+    [TempData]
+    public string StatusMessage { get; set; }
+
+    public class InputModel
+    {
+        public string Email { get; set; }
+
+        public string Code { get; set; }
+
+        [Required(ErrorMessage = "Введіть новий пароль")]
+        [DataType(DataType.Password)]
+        public string NewPassword { get; set; }
+    }
+
+    public async Task<IActionResult> OnGetAsync()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound();
+
+        Input = new InputModel { Email = await _userManager.GetEmailAsync(user) };
+        return Page();
+    }
+
+    // ХЕНДЛЕР 1: Відправка коду (Аналог OnPostSendVerificationEmailAsync)
+    public async Task<IActionResult> OnPostSendCodeAsync()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound();
+
+        // 1. Генеруємо 6-значний код
+        Random generator = new Random();
+        string code = generator.Next(100000, 999999).ToString();
+
+        // 2. Зберігаємо дані в TempData, як у файлі Email
+        TempData["PasswordResetCode"] = code;
+        TempData["PendingNewPassword"] = Input.NewPassword;
+
+        // 3. Відправляємо лист на поточну пошту
+        string email = await _userManager.GetEmailAsync(user);
+        await _emailSender.SendEmailAsync(email, "Код для зміни пароля",
+            $"Ваш код підтвердження: <b style='font-size:24px;'>{code}</b>. Якщо ви цього не робили - змініть пароль!");
+
+        StatusMessage = "Код відправлено на вашу пошту.";
+
+        // Повертаємо Page(), щоб зберегти введені дані в полях
+        Input.Email = email;
+        return Page();
+    }
+
+    // ХЕНДЛЕР 2: Сама зміна пароля (Аналог OnPostChangeEmailAsync)
+    public async Task<IActionResult> OnPostChangePasswordAsync()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound();
+
+        // Дістаємо дані з TempData
+        var savedCode = TempData["PasswordResetCode"] as string;
+        var pendingPassword = TempData["PendingNewPassword"] as string;
+
+        // Підтримуємо дані в TempData (Keep), щоб при помилці вони не зникли
+        TempData.Keep("PasswordResetCode");
+        TempData.Keep("PendingNewPassword");
+
+        // Перевірка коду
+        if (string.IsNullOrEmpty(Input.Code) || Input.Code != savedCode)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _logger = logger;
-        }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        [BindProperty]
-        public InputModel Input { get; set; }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        [TempData]
-        public string StatusMessage { get; set; }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        public class InputModel
-        {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [DataType(DataType.Password)]
-            [Display(Name = "Current password")]
-            public string OldPassword { get; set; }
-
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Password)]
-            [Display(Name = "New password")]
-            public string NewPassword { get; set; }
-
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [DataType(DataType.Password)]
-            [Display(Name = "Confirm new password")]
-            [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
-        }
-
-        public async Task<IActionResult> OnGetAsync()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
-            var hasPassword = await _userManager.HasPasswordAsync(user);
-            if (!hasPassword)
-            {
-                return RedirectToPage("./SetPassword");
-            }
-
+            ModelState.AddModelError("Input.Code", "Невірний або прострочений код підтвердження.");
+            Input.Email = await _userManager.GetEmailAsync(user);
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        // Перевірка, чи не загубився пароль у TempData
+        var passwordToSet = !string.IsNullOrEmpty(Input.NewPassword) ? Input.NewPassword : pendingPassword;
+
+        if (string.IsNullOrEmpty(passwordToSet))
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
+            ModelState.AddModelError("Input.NewPassword", "Будь ласка, введіть новий пароль ще раз.");
+            Input.Email = await _userManager.GetEmailAsync(user);
+            return Page();
+        }
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
-            var changePasswordResult = await _userManager.ChangePasswordAsync(user, Input.OldPassword, Input.NewPassword);
-            if (!changePasswordResult.Succeeded)
-            {
-                foreach (var error in changePasswordResult.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                return Page();
-            }
-
-            await _signInManager.RefreshSignInAsync(user);
-            _logger.LogInformation("User changed their password successfully.");
-            StatusMessage = "Your password has been changed.";
-
+        // Логіка зміни пароля
+        var removeResult = await _userManager.RemovePasswordAsync(user);
+        if (!removeResult.Succeeded)
+        {
+            StatusMessage = "Помилка при видаленні старого пароля.";
             return RedirectToPage();
         }
+
+        var addResult = await _userManager.AddPasswordAsync(user, passwordToSet);
+        if (!addResult.Succeeded)
+        {
+            foreach (var error in addResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            Input.Email = await _userManager.GetEmailAsync(user);
+            return Page();
+        }
+
+        await _signInManager.RefreshSignInAsync(user);
+        StatusMessage = "Пароль успішно змінено!";
+
+        return RedirectToPage();
     }
 }

@@ -21,7 +21,7 @@ namespace EducationPlatform
             builder.Services.AddDefaultIdentity<IdentityUser>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = true; // Обов'язкове підтвердження для входу
-                // ДОЗВОЛЯЄМО УКРАЇНСЬКУ МОВУ ТА ПРОБІЛИ В ІМЕНІ
+                // ДОЗВОЛЯЄМО ПЕВНІ СИМВОЛИ В ІМЕНІ
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
             })
                 .AddRoles<IdentityRole>() // Важливо для роботи ролей
@@ -32,6 +32,10 @@ namespace EducationPlatform
 
             //Тепер є сервіс для відправкли листа, який використовує клас EmailSender
             builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+
+            // ДОДАЄМО НАШ ПЛАТІЖНИЙ СЕРВІС
+            builder.Services.AddTransient<IPaymentService, LiqPayService>();
 
             var app = builder.Build();
 

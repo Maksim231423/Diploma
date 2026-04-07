@@ -19,9 +19,16 @@
 
             <h2 class="text-primary my-4">@Model.Price ₴</h2>
 
-            <button class="btn btn-lg btn-danger px-5 py-3 rounded-pill fw-bold shadow">
-                🚀 Почати навчання
-            </button>
+            <form asp-controller="Payment" asp-action="Checkout" method="post">
+                <input type="hidden" name="courseId" value="@Model.Id" />
+                <input type="hidden" name="courseTitle" value="@Model.Title" />
+
+                <input type="hidden" name="price" value="@Math.Round(Model.Price)" />
+
+                <button type="submit" class="btn btn-lg btn-danger px-5 py-3 rounded-pill fw-bold shadow w-100">
+                    💳 Придбати за @Model.Price ₴
+                </button>
+            </form>
         </div>
     </div>
 
