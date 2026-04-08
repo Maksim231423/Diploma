@@ -71,8 +71,11 @@ namespace EducationPlatform.Controllers
         // ОНОВЛЕНИЙ МЕТОД ДЕТАЛЕЙ КУРСУ
         public async Task<IActionResult> CourseDetails(int id)
         {
+
             var course = await _context.Courses
                 .Include(c => c.Lessons)
+                .Include(c => c.Comments)
+                .ThenInclude(coment => coment.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (course == null)
@@ -95,6 +98,43 @@ namespace EducationPlatform.Controllers
             ViewBag.IsPurchased = isPurchased;
 
             return View(course);
+        }
+
+        [HttpPost]
+        [Authorize] // Тільки авторизовані користувачі
+        public async Task<IActionResult> AddComment(int courseId, string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return RedirectToAction("CourseDetails", new { id = courseId });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            // 🔒 ДОДАНО: Перевіряємо, чи купив цей користувач цей курс
+            bool isPurchased = await _context.Purchases
+                .AnyAsync(p => p.CourseId == courseId && p.UserId == user.Id);
+
+            if (!isPurchased)
+            {
+                // Якщо хтось спробує надіслати запит напряму в обхід браузера
+                TempData["AccessDenied"] = "Тільки студенти, які придбали курс, можуть залишати відгуки 🔒";
+                return RedirectToAction("CourseDetails", new { id = courseId });
+            }
+
+            var comment = new Comment
+            {
+                CourseId = courseId,
+                UserId = user.Id,
+                Text = text,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Comments.Add(comment);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("CourseDetails", new { id = courseId });
         }
 
         public async Task<IActionResult> Lesson(int id)

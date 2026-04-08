@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace EducationPlatform.Services
+namespace EducationPlatform.Models.ViewModels
 {
     public static class DbInitializer
     {

@@ -292,3 +292,15 @@ footer {
     margin-top: 5px;
     font-weight: normal;
 }
+
+.actions-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+    .actions-column .btn {
+        margin: 0;
+    }

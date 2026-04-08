@@ -1,0 +1,222 @@
+﻿@model EducationPlatform.Models.ViewModels.CourseEditViewModel
+@{
+    bool isCreateMode = Model.Id == 0;
+    string pageTitle = isCreateMode ? "Створення нового курсу" : $"Редагування курсу: {Model.Title}";
+    string icon = isCreateMode ? "✨" : "✏️";
+    string buttonText = isCreateMode ? "🚀 Створити курс" : "💾 Зберегти всі зміни";
+    string formAction = isCreateMode ? "CreateCourse" : "EditCourse";
+    ViewData["Title"] = pageTitle;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-white mb-0">@icon @pageTitle</h2>
+    <a asp-action="Courses" class="btn btn-outline-secondary px-4">← Назад до списку</a>
+</div>
+
+<form asp-action="@formAction" method="post" id="courseForm">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card bg-dark border-secondary shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label text-secondary">Назва курсу</label>
+                        <input asp-for="Title" class="form-control bg-dark text-white border-secondary" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label text-secondary">Опис курсу</label>
+                        <textarea asp-for="Description" class="form-control bg-dark text-white border-secondary" rows="4"></textarea>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Price" class="form-label text-secondary">Ціна (₴)</label>
+                            <input asp-for="Price" type="number" step="0.01" min="0" class="form-control bg-dark text-white border-secondary" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="SelectedTags" class="form-label text-secondary">Теги курсу</label>
+                            <select asp-for="SelectedTags" asp-items="ViewBag.Tags" class="form-select bg-dark text-white border-secondary" multiple style="height: 100px;"></select>
+                            <small class="text-secondary">Ctrl (Cmd), щоб обрати кілька.</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="ImageUrl" class="form-label text-secondary">URL обкладинки</label>
+                        <input asp-for="ImageUrl" class="form-control bg-dark text-white border-secondary" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="text-white mb-0">📚 Програма курсу</h4>
+                <button type="button" class="btn btn-sm btn-outline-info fw-bold" onclick="openLessonModal()">
+                    + Додати урок
+                </button>
+            </div>
+
+            <div class="card bg-dark border-secondary shadow-sm mb-5">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle" id="lessonsTable">
+                            <thead class="table-active border-secondary">
+                                <tr>
+                                    <th class="py-3 px-4 text-center" style="width: 80px;">#</th>
+                                    <th class="py-3">Назва уроку</th>
+                                    <th class="py-3 text-center">Домашка</th>
+                                    <th class="py-3 text-end px-4">Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lessonsBody">
+                                @if (Model.Lessons != null)
+                                {
+                                    for (int i = 0; i < Model.Lessons.Count; i++)
+                                    {
+                                        <tr class="lesson-row">
+                                            <td class="px-4 text-center text-warning fw-bold">
+                                                <input type="hidden" class="lesson-id" name="Lessons[@i].Id" value="@Model.Lessons[i].Id" />
+                                                <input type="hidden" class="lesson-order" name="Lessons[@i].OrderNumber" value="@Model.Lessons[i].OrderNumber" />
+                                                <input type="hidden" class="lesson-title" name="Lessons[@i].Title" value="@Model.Lessons[i].Title" />
+                                                <input type="hidden" class="lesson-video" name="Lessons[@i].VideoUrl" value="@Model.Lessons[i].VideoUrl" />
+                                                <input type="hidden" class="lesson-hw" name="Lessons[@i].HomeworkDescription" value="@Model.Lessons[i].HomeworkDescription" />
+                                                <span class="display-order">@Model.Lessons[i].OrderNumber</span>
+                                            </td>
+                                            <td class="text-white display-title">@Model.Lessons[i].Title</td>
+                                            <td class="text-center display-hw">
+                                                @(string.IsNullOrEmpty(Model.Lessons[i].HomeworkDescription) ? Html.Raw("<span class='badge bg-secondary'>Немає</span>") : Html.Raw("<span class='badge bg-success'>Є завдання</span>"))
+                                            </td>
+                                            <td class="text-end px-4">
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeLessonRow(this)">🗑️</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-end mb-5">
+                <button type="submit" class="btn btn-success btn-lg px-5 fw-bold">@buttonText</button>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary text-secondary">Прев'ю обкладинки</div>
+                <div class="card-body text-center">
+                    <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://via.placeholder.com/600x400/343a40/ffffff?text=Курс" : Model.ImageUrl)"
+                         class="img-fluid rounded shadow-sm" style="max-height: 200px; object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="modal fade" id="addLessonModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">📝 Додати новий урок</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label class="form-label text-secondary">Назва уроку *</label>
+                        <input type="text" id="modalTitle" class="form-control bg-dark text-white border-secondary" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-secondary">URL відео</label>
+                    <input type="url" id="modalVideo" class="form-control bg-dark text-white border-secondary" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-secondary">Домашнє завдання (опціонально)</label>
+                    <textarea id="modalHw" class="form-control bg-dark text-white border-secondary" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Скасувати</button>
+                <button type="button" class="btn btn-primary" onclick="saveLessonToTable()">Зберегти в таблицю</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Відкриває модалку та очищає її поля
+        function openLessonModal() {
+            document.getElementById('modalTitle').value = '';
+            document.getElementById('modalVideo').value = '';
+            document.getElementById('modalHw').value = '';
+            var myModal = new bootstrap.Modal(document.getElementById('addLessonModal'));
+            myModal.show();
+        }
+
+        // Забирає дані з модалки і малює новий рядок у HTML-таблиці
+        function saveLessonToTable() {
+            const title = document.getElementById('modalTitle').value;
+            const video = document.getElementById('modalVideo').value;
+            const hw = document.getElementById('modalHw').value;
+
+            if (!title) { alert('Введіть назву уроку!'); return; }
+
+            const tbody = document.getElementById('lessonsBody');
+            const tr = document.createElement('tr');
+            tr.className = 'lesson-row';
+
+            // Створюємо HTML-код нового рядка (поки без правильних індексів, ми їх оновимо нижче)
+            tr.innerHTML = `
+                <td class="px-4 text-center text-warning fw-bold">
+                    <input type="hidden" class="lesson-id" value="0" />
+                    <input type="hidden" class="lesson-order" value="0" />
+                    <input type="hidden" class="lesson-title" value="${title}" />
+                    <input type="hidden" class="lesson-video" value="${video}" />
+                    <input type="hidden" class="lesson-hw" value="${hw}" />
+                    <span class="display-order">0</span>
+                </td>
+                <td class="text-white display-title">${title}</td>
+                <td class="text-center display-hw">
+                    ${hw ? '<span class="badge bg-success">Є завдання</span>' : '<span class="badge bg-secondary">Немає</span>'}
+                </td>
+                <td class="text-end px-4">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeLessonRow(this)">🗑️</button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+            recalculateIndices(); // Присвоюємо правильні номери і name-атрибути
+
+            // Закриваємо модалку
+            bootstrap.Modal.getInstance(document.getElementById('addLessonModal')).hide();
+        }
+
+        // Видаляє рядок (тільки з екрану)
+        function removeLessonRow(btn) {
+            btn.closest('tr').remove();
+            recalculateIndices();
+        }
+
+        // НАЙВАЖЛИВІША ФУНКЦІЯ: Оновлює порядкові номери і атрибути "name", щоб ASP.NET зрозумів масив
+        function recalculateIndices() {
+            const rows = document.querySelectorAll('#lessonsBody tr.lesson-row');
+            rows.forEach((row, index) => {
+                // Візуальні номери (1, 2, 3...)
+                row.querySelector('.display-order').textContent = index + 1;
+                row.querySelector('.lesson-order').value = index + 1;
+
+                // Атрибути name для C# контролера (Lessons[0].Title, Lessons[1].Title...)
+                row.querySelector('.lesson-id').name = `Lessons[${index}].Id`;
+                row.querySelector('.lesson-order').name = `Lessons[${index}].OrderNumber`;
+                row.querySelector('.lesson-title').name = `Lessons[${index}].Title`;
+                row.querySelector('.lesson-video').name = `Lessons[${index}].VideoUrl`;
+                row.querySelector('.lesson-hw').name = `Lessons[${index}].HomeworkDescription`;
+            });
+        }
+    </script>
+}

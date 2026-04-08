@@ -48,6 +48,6 @@
         <div class="col-md-9 col-lg-10">
             @RenderBody()
         </div>
-
     </div>
 </div>
+@await RenderSectionAsync("Scripts", required: false)

@@ -1,4 +1,5 @@
 using EducationPlatform.Data;
+using EducationPlatform.Models.ViewModels;
 using EducationPlatform.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;

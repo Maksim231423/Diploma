@@ -1,13 +1,22 @@
-﻿@{
-    ViewData["Title"] = "Курси та Уроки";
+﻿@model List<EducationPlatform.Models.Course>
+@{
+    ViewData["Title"] = "Управління курсами";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        ✅ @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="text-white mb-0">📚 Управління курсами</h2>
-    <button class="btn btn-primary fw-bold px-4">+ Створити курс</button>
+    <a asp-action="CreateCourse" class="btn btn-primary fw-bold px-4">+ Створити курс</a>
 </div>
 
-<div class="card bg-dark border-secondary shadow-sm">
+<div class="card bg-dark border-secondary shadow-sm mb-5">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-dark table-hover mb-0 align-middle">
@@ -21,44 +30,114 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="px-4 py-3">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-secondary rounded me-3" style="width: 50px; height: 35px; background-image: url('https://via.placeholder.com/50x35/0d6efd/ffffff?text=C%23'); background-position: center; background-size: cover;"></div>
-                                <div class="text-white fw-bold">Основи C# та .NET Core</div>
-                            </div>
-                        </td>
-                        <td class="text-center text-info fw-bold">12</td>
-                        <td>
-                            <span class="badge border border-secondary text-secondary me-1">#C#</span>
-                            <span class="badge border border-secondary text-secondary">#.NET</span>
-                        </td>
-                        <td class="text-success fw-bold">1500 ₴</td>
-                        <td class="text-end px-4">
-                            <button class="btn btn-sm btn-outline-info me-1" title="Редагувати">✏️</button>
-                            <button class="btn btn-sm btn-outline-danger" title="Видалити">🗑️</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-3">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-secondary rounded me-3" style="width: 50px; height: 35px; background-image: url('https://via.placeholder.com/50x35/ffc107/000000?text=SQL'); background-position: center; background-size: cover;"></div>
-                                <div class="text-white fw-bold">Проектування Баз Даних SQL</div>
-                            </div>
-                        </td>
-                        <td class="text-center text-info fw-bold">8</td>
-                        <td>
-                            <span class="badge border border-secondary text-secondary me-1">#SQL</span>
-                            <span class="badge border border-secondary text-secondary">#БД</span>
-                        </td>
-                        <td class="text-success fw-bold">1200 ₴</td>
-                        <td class="text-end px-4">
-                            <button class="btn btn-sm btn-outline-info me-1" title="Редагувати">✏️</button>
-                            <button class="btn btn-sm btn-outline-danger" title="Видалити">🗑️</button>
-                        </td>
-                    </tr>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var course in Model)
+                        {
+                            <tr>
+                                <td class="px-4 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3 rounded overflow-hidden" style="width: 60px; height: 40px;">
+                                            <img src="@(string.IsNullOrEmpty(course.ImageUrl) ? "https://via.placeholder.com/60x40/343a40/ffffff?text=Курс" : course.ImageUrl)"
+                                                 alt="@course.Title" style="width: 100%; height: 100%; object-fit: cover;">
+                                        </div>
+                                        <div class="text-white fw-bold">@course.Title</div>
+                                    </div>
+                                </td>
+
+                                <td class="text-center text-info fw-bold">
+                                    @course.Lessons.Count
+                                </td>
+
+                                <td>
+                                    @if (course.Tags != null && course.Tags.Any())
+                                    {
+                                        foreach (var tag in course.Tags)
+                                        {
+                                            <span class="badge border border-secondary text-secondary me-1">#@tag.Name</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary text-light">Без тегів</span>
+                                    }
+                                </td>
+
+                                <td class="text-success fw-bold">@course.Price ₴</td>
+
+                                <td class="actions-column text-end px-4">
+                                    <a asp-action="EditCourse" asp-route-id="@course.Id" class="btn btn-sm btn-outline-info me-1" title="Редагувати">✏️</a>
+
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                            title="Видалити"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal"
+                                            data-course-id="@course.Id"
+                                            data-course-title="@course.Title">
+                                        🗑️
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-secondary">
+                                Жодного курсу ще не створено.
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-danger" id="deleteModalLabel">⚠️ Підтвердження видалення</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Ви дійсно хочете видалити курс <strong id="modalCourseTitle" class="text-warning"></strong>?<br />
+                <span class="text-secondary small">Ця дія незворотна. Всі уроки та коментарі, пов'язані з цим курсом, також можуть бути видалені.</span>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Скасувати</button>
+
+                <form id="deleteForm" asp-controller="Admin" asp-action="DeleteCourse" method="post">
+                    <input type="hidden" id="modalCourseId" name="id" value="" />
+                    <button type="submit" class="btn btn-danger">🗑️ Так, видалити</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var deleteModal = document.getElementById('deleteModal');
+
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+                // Кнопка, яка викликала модальне вікно
+                var button = event.relatedTarget;
+
+                // Отримуємо дані з атрибутів data-*
+                var courseId = button.getAttribute('data-course-id');
+                var courseTitle = button.getAttribute('data-course-title');
+
+                // Знаходимо елементи всередині модального вікна
+                var modalTitleSpan = deleteModal.querySelector('#modalCourseTitle');
+                var hiddenInput = deleteModal.querySelector('#modalCourseId');
+
+                // Вставляємо дані
+                modalTitleSpan.textContent = '"' + courseTitle + '"';
+                hiddenInput.value = courseId;
+            });
+        });
+    </script>
+}

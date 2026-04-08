@@ -1,4 +1,6 @@
-﻿@{
+﻿@model EducationPlatform.Models.AdminDashboardViewModel
+
+@{
     ViewData["Title"] = "Панель адміністратора";
 }
 
@@ -9,7 +11,7 @@
         <div class="card bg-dark border-secondary shadow-sm">
             <div class="card-body">
                 <h6 class="text-secondary text-uppercase mb-2">Студентів</h6>
-                <h3 class="text-white fw-bold mb-0">1,245</h3>
+                <h3 class="text-white fw-bold mb-0">@Model.TotalStudents</h3>
             </div>
         </div>
     </div>
@@ -17,15 +19,15 @@
         <div class="card bg-dark border-secondary shadow-sm">
             <div class="card-body">
                 <h6 class="text-secondary text-uppercase mb-2">Активних курсів</h6>
-                <h3 class="text-white fw-bold mb-0">12</h3>
+                <h3 class="text-white fw-bold mb-0">@Model.ActiveCourses</h3>
             </div>
         </div>
     </div>
     <div class="col-md-3 mb-3">
-        <div class="card bg-dark border-secondary shadow-sm border-start border-warning border-4">
+        <div class="card bg-dark border-secondary shadow-sm @(Model.NewHomeworks > 0 ? "border-start border-warning border-4" : "")">
             <div class="card-body">
                 <h6 class="text-secondary text-uppercase mb-2">Нових завдань</h6>
-                <h3 class="text-white fw-bold mb-0">3</h3>
+                <h3 class="text-white fw-bold mb-0">@Model.NewHomeworks</h3>
             </div>
         </div>
     </div>
@@ -33,7 +35,7 @@
         <div class="card bg-dark border-secondary shadow-sm">
             <div class="card-body">
                 <h6 class="text-secondary text-uppercase mb-2">Дохід за місяць</h6>
-                <h3 class="text-success fw-bold mb-0">₴ 45,000</h3>
+                <h3 class="text-success fw-bold mb-0">₴ @Model.MonthlyIncome.ToString("N0")</h3>
             </div>
         </div>
     </div>
