@@ -5,6 +5,14 @@
 }
 
 <div class="container mt-5">
+    @if (TempData["AccessDenied"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm border-warning" role="alert">
+            <span class="fs-5 me-2">⚠️</span>
+            <strong>Обмежений доступ!</strong> @TempData["AccessDenied"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     <div class="row">
         <div class="col-md-5 mb-4">
             <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://via.placeholder.com/600x400?text=ITskill+Course" : Model.ImageUrl)"
@@ -19,16 +27,24 @@
 
             <h2 class="text-primary my-4">@Model.Price ₴</h2>
 
-            <form asp-controller="Payment" asp-action="Checkout" method="post">
-                <input type="hidden" name="courseId" value="@Model.Id" />
-                <input type="hidden" name="courseTitle" value="@Model.Title" />
+            @if (ViewBag.IsPurchased == true)
+            {
+                <div class="alert alert-success rounded-pill px-5 py-3 fw-bold shadow text-center">
+                    ✅ Ви вже придбали цей курс
+                </div>
+            }
+            else
+            {
+                <form asp-controller="Payment" asp-action="Checkout" method="post">
+                    <input type="hidden" name="courseId" value="@Model.Id" />
+                    <input type="hidden" name="courseTitle" value="@Model.Title" />
+                    <input type="hidden" name="price" value="@Model.Price" />
 
-                <input type="hidden" name="price" value="@Math.Round(Model.Price)" />
-
-                <button type="submit" class="btn btn-lg btn-danger px-5 py-3 rounded-pill fw-bold shadow w-100">
-                    💳 Придбати за @Model.Price ₴
-                </button>
-            </form>
+                    <button type="submit" class="btn btn-lg btn-danger px-5 py-3 rounded-pill fw-bold shadow w-100">
+                        🚀 Почати навчання за @Model.Price ₴
+                    </button>
+                </form>
+            }
         </div>
     </div>
 

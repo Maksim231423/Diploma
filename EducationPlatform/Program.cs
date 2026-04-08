@@ -77,7 +77,7 @@ namespace EducationPlatform
                 var services = scope.ServiceProvider;
                 try
                 {
-                    await EducationPlatform.Data.DbInitializer.SeedRolesAndAdminAsync(services);
+                    await DbInitializer.SeedRolesAndAdminAsync(services);
                 }
                 catch (Exception ex)
                 {

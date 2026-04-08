@@ -64,32 +64,83 @@
 
             <hr class="border-secondary my-5" />
 
-            <div class="row mt-5 justify-content-center">
-                <div class="col-md-8 mb-4">
-                    <div class="card bg-dark border-secondary shadow-sm">
-                        <div class="card-body p-4 p-md-5">
-                            <h5 class="text-white mb-3">🎯 Практичне завдання</h5>
-                            <p class="text-secondary mb-4 fs-5">
-                                Напишіть просту консольну програму, яка запитує ім'я користувача та виводить привітання. Завантажте код на свій GitHub та надішліть посилання.
-                            </p>
-                            <form>
-                                <div class="mb-3">
-                                    <input type="url" class="form-control bg-dark text-white border-secondary py-2" placeholder="Вставте посилання на GitHub або Google Диск..." required>
-                                </div>
-                                <div class="text-end">
-                                    <button type="submit" class="btn btn-outline-info px-4 fw-bold">Відправити</button>
-                                </div>
-                            </form>
+            @if (!string.IsNullOrEmpty(Model.HomeworkDescription))
+            {
+                <div class="row mt-5 justify-content-center">
+                    <div class="col-md-8 mb-4">
+
+                        @if (TempData["HomeworkSuccess"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                                ✅ @TempData["HomeworkSuccess"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        <div class="card bg-dark border-secondary shadow-sm">
+                            <div class="card-body p-4 p-md-5">
+                                <h5 class="text-white mb-3">🎯 Практичне завдання</h5>
+
+                                <p class="text-secondary mb-4 fs-5">
+                                    @Model.HomeworkDescription
+                                </p>
+
+                                @if (ViewBag.HasSubmitted == true)
+                                {
+                                    <div class="alert alert-info border-info bg-dark text-info d-flex align-items-center shadow-sm" role="alert">
+                                        <span class="fs-4 me-3">⏳</span>
+                                        <div>
+                                            <strong>Ваша робота перевіряється!</strong>
+                                            <br>
+                                            <small class="text-secondary">Ви вже надіслали посилання. Очікуйте на оцінку викладача.</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3 mt-3">
+                                        <input type="text" class="form-control bg-dark text-white-50 border-secondary py-2" value="Рішення відправлено" disabled>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <form asp-controller="Home" asp-action="SubmitHomework" method="post">
+                                        <input type="hidden" name="lessonId" value="@Model.Id" />
+
+                                        <div class="mb-3">
+                                            <input type="url"
+                                                   name="solutionLink"
+                                                   class="form-control bg-dark text-white border-secondary py-2"
+                                                   placeholder="Вставте посилання на GitHub або Google Диск..."
+                                                   required
+                                                   oninvalid="this.setCustomValidity('Будь ласка, введіть коректне посилання (повинно починатися з http:// або https://)')"
+                                                   oninput="this.setCustomValidity('')">
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-outline-info px-4 fw-bold">Відправити</button>
+                                        </div>
+                                    </form>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
+            }
             <div class="d-flex justify-content-between mt-4 mb-5 pb-5">
                 <a asp-controller="Home" asp-action="CourseDetails" asp-route-id="@Model.CourseId" class="btn btn-outline-secondary px-4 py-2">
                     ← Повернутися до програми
                 </a>
-                <button class="btn btn-primary px-4 py-2">Наступний урок →</button>
+
+                @if (ViewBag.NextLessonId != null)
+                {
+                    <a asp-controller="Home" asp-action="Lesson" asp-route-id="@ViewBag.NextLessonId" class="btn btn-primary px-4 py-2">
+                        Наступний урок →
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Home" asp-action="CourseDetails" asp-route-id="@Model.CourseId" class="btn btn-success px-4 py-2 fw-bold shadow-sm">
+                        🎓 Завершити курс
+                    </a>
+                }
             </div>
 
         </div>

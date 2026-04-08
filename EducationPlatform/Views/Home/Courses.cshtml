@@ -1,6 +1,10 @@
 ﻿@model List<EducationPlatform.Models.Course>
 @{
     ViewData["Title"] = "Каталог курсів";
+
+    // 1. ОГОЛОШУЄМО ЗМІННІ НА САМОМУ ВЕРХУ, щоб вся сторінка їх бачила
+    var currentTags = ViewBag.SelectedTags as List<string> ?? new List<string>();
+    bool hasSearchOrTags = !string.IsNullOrEmpty(ViewBag.SearchQuery) || currentTags.Any();
 }
 
 <div class="container-fluid bg-dark text-white py-5 mb-5 border-bottom border-secondary shadow-sm">
@@ -9,19 +13,52 @@
 
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="input-group input-group-lg shadow-sm">
-                    <input type="text" class="form-control bg-dark text-white border-secondary" placeholder="Який курс ви шукаєте? (напр. C# або SQL)">
-                    <button class="btn btn-primary px-5" type="button">🔍 Знайти</button>
-                </div>
+                <form method="get" asp-action="Courses" class="input-group input-group-lg shadow-sm">
+
+                    @if (currentTags.Any())
+                    {
+                        foreach (var tag in currentTags)
+                        {
+                            <input type="hidden" name="selectedTags" value="@tag" />
+                        }
+                    }
+
+                    <input type="text" name="searchQuery" value="@ViewBag.SearchQuery" class="form-control bg-dark text-white border-secondary" placeholder="Який курс ви шукаєте? (напр. C# або SQL)">
+
+                    <button class="btn btn-primary px-4" type="submit">🔍 Знайти</button>
+
+                    @if (hasSearchOrTags)
+                    {
+                        <a asp-action="Courses" class="btn btn-outline-danger px-3">❌ Скинути</a>
+                    }
+                </form>
             </div>
         </div>
 
         <div class="mt-4">
-            <span class="text-secondary me-3">Популярні теги:</span>
-            <span class="badge bg-secondary me-2 p-2 border border-secondary" style="cursor: pointer;">#C#</span>
-            <span class="badge bg-secondary me-2 p-2 border border-secondary" style="cursor: pointer;">#.NET Core</span>
-            <span class="badge bg-secondary me-2 p-2 border border-secondary" style="cursor: pointer;">#Бази Даних</span>
-            <span class="badge bg-secondary p-2 border border-secondary" style="cursor: pointer;">#Веб-розробка</span>
+            <span class="text-secondary me-3">Фільтр по тегам:</span>
+
+            @if (ViewBag.AllTags != null)
+            {
+                foreach (var t in ViewBag.AllTags as List<string>)
+                {
+                    // Перевіряємо, чи є цей тег у списку обраних (тепер currentTags доступна!)
+                    bool isSelected = currentTags.Contains(t);
+                    var bgClass = isSelected ? "bg-primary text-white" : "bg-secondary text-white";
+
+                    // Створюємо новий список тегів для посилання
+                    var newTagsList = new List<string>(currentTags);
+                    if (isSelected) newTagsList.Remove(t);
+                    else newTagsList.Add(t);
+
+                    <a asp-action="Courses"
+                       asp-route-searchQuery="@ViewBag.SearchQuery"
+                       asp-route-selectedTags="@string.Join(",", newTagsList)"
+                       class="badge @bgClass me-2 p-2 border border-secondary text-decoration-none" style="cursor: pointer;">
+                        #@(isSelected ? "✓ " : "")@t
+                    </a>
+                }
+            }
         </div>
     </div>
 </div>
@@ -38,7 +75,19 @@
                              class="card-img-top border-bottom border-secondary" alt="@course.Title" style="height: 200px; object-fit: cover;">
 
                         <div class="card-body d-flex flex-column">
-                            <div class="badge bg-warning text-dark w-25 mb-3">C# / .NET</div>
+                            <div class="mb-3">
+                                @if (course.Tags != null && course.Tags.Any())
+                                {
+                                    @foreach (var cTag in course.Tags)
+                                    {
+                                        <span class="badge bg-warning text-dark me-1">@cTag.Name</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary text-light me-1">Без тегів</span>
+                                }
+                            </div>
                             <h5 class="card-title fw-bold">@course.Title</h5>
                             <p class="card-text text-secondary mb-4 flex-grow-1">
                                 @(course.Description?.Length > 80 ? course.Description.Substring(0, 80) + "..." : course.Description)

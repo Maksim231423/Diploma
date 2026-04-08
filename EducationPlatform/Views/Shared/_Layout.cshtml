@@ -16,13 +16,13 @@
     <header>
         <div class="header-content">
             <div class="logo-section">
-                <a class="logo-text" asp-controller="Home" asp-action="Index">ITskill</a>
+                <a class="logo-text" asp-area="" asp-controller="Home" asp-action="Index">ITskill</a>
             </div>
 
             <nav class="center-nav">
-                <a asp-controller="Home" asp-action="Index" class="nav-link">ГОЛОВНА</a>
-                <a asp-controller="Home" asp-action="About" class="nav-link">ПРО НАС</a>
-                <a asp-controller="Home" asp-action="Courses" class="nav-link">КУРСИ</a>
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="nav-link">ГОЛОВНА</a>
+                <a asp-area="" asp-controller="Home" asp-action="About" class="nav-link">ПРО НАС</a>
+                <a asp-area="" asp-controller="Home" asp-action="Courses" class="nav-link">КУРСИ</a>
 
                 @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
                 {

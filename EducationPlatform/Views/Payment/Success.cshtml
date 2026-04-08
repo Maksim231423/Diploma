@@ -19,7 +19,7 @@
                         Курс вже додано до вашого особистого кабінету.
                     </p>
 
-                    <a href="/StudentCabinet" class="btn btn-success btn-lg px-5">
+                    <a asp-controller="Home" asp-action="CourseDetails" asp-route-id="@ViewBag.CourseId" class="btn btn-success btn-lg px-5">
                         Перейти до навчання
                     </a>
                 </div>
