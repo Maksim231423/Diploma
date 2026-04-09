@@ -1,4 +1,4 @@
-﻿namespace EducationPlatform.Models
+﻿namespace EducationPlatform.Models.ViewModels
 {
     public class AdminDashboardViewModel
     {

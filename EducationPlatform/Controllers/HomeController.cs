@@ -223,5 +223,27 @@ namespace EducationPlatform.Controllers
 
             return RedirectToAction("Lesson", new { id = lessonId });
         }
+
+        [HttpPost]
+        [Authorize] // Тільки для авторизованих
+        public async Task<IActionResult> MarkNotificationsAsRead([FromServices] ApplicationDbContext context, [FromServices] Microsoft.AspNetCore.Identity.UserManager<Microsoft.AspNetCore.Identity.IdentityUser> userManager)
+        {
+            var userId = userManager.GetUserId(User);
+            if (userId == null) return Unauthorized();
+
+            // Знаходимо всі непрочитані сповіщення користувача
+            var unreadNotifs = await context.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .ToListAsync();
+
+            // Робимо їх прочитаними
+            foreach (var notif in unreadNotifs)
+            {
+                notif.IsRead = true;
+            }
+
+            await context.SaveChangesAsync();
+            return Ok();
+        }
     }
 }

@@ -54,6 +54,8 @@ namespace EducationPlatform.Areas.Admin.Controllers
                 MonthlyIncome = income
             };
 
+            // ДОДАНО: Передаємо список курсів для випадаючого списку розсилки
+            ViewBag.Courses = await _context.Courses.ToListAsync();
             return View(model);
         }
 
@@ -91,28 +93,42 @@ namespace EducationPlatform.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> SendFeedback(int submissionId, string feedbackMessage)
         {
-            // Знаходимо домашку (підтягуємо також Урок, щоб знати його назву для листа)
+            // Знаходимо домашку (підтягуємо також Урок і Користувача)
             var submission = await _context.HomeworkSubmissions
                 .Include(h => h.User)
-                .Include(h => h.Lesson) // Додали це, щоб взяти назву уроку
+                .Include(h => h.Lesson)
                 .FirstOrDefaultAsync(h => h.Id == submissionId);
 
             if (submission != null)
             {
-                // Позначаємо як перевірену
+                // 1. Позначаємо завдання як перевірене
                 submission.IsChecked = true;
 
+                // =======================================================
+                // 2. ДОДАЄМО СПОВІЩЕННЯ НА САЙТІ (ДЛЯ ДЗВІНОЧКА)
+                // =======================================================
+                if (submission.User != null)
+                {
+                    var notification = new Notification
+                    {
+                        UserId = submission.User.Id, // ID студента
+                        Message = $"Ваше домашнє завдання до уроку '{submission.Lesson?.Title}' було перевірено ментором!",
+                        IsRead = false,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.Notifications.Add(notification);
+                }
+
+                // 3. Зберігаємо всі зміни в базу даних (і статус домашки, і нове сповіщення)
                 await _context.SaveChangesAsync();
 
                 string studentEmail = submission.User?.Email ?? "";
 
-                // РЕАЛЬНА ВІДПРАВКА ЛИСТА
+                // 4. ВІДПРАВЛЯЄМО EMAIL
                 if (!string.IsNullOrEmpty(studentEmail))
                 {
-                    // Формуємо тему листа
                     string subject = $"Оцінка домашнього завдання: {submission.Lesson?.Title}";
 
-                    // Формуємо красиве HTML-тіло листа
                     string htmlMessage = $@"
                         <div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>
                             <h2 style='color: #0d6efd;'>Привіт, {submission.User?.UserName}!</h2>
@@ -121,24 +137,126 @@ namespace EducationPlatform.Areas.Admin.Controllers
                                 <h4>Коментар ментора:</h4>
                                 <p style='font-size: 16px; font-style: italic;'>{feedbackMessage}</p>
                             </div>
+                            <p>Ви можете перевірити деталі в особистому кабінеті на сайті.</p>
                             <p>Продовжуйте в тому ж дусі!</p>
                             <p>З повагою,<br>Команда <b>EducationPlatform</b></p>
                         </div>";
 
-                    // Відправляємо!
                     await _emailSender.SendEmailAsync(studentEmail, subject, htmlMessage);
                 }
 
-                TempData["SuccessMessage"] = $"Відгук успішно відправлено студенту на адресу {studentEmail} 🚀";
+                TempData["SuccessMessage"] = $"Відгук надіслано на пошту та у сповіщення студенту {submission.User?.UserName} 🚀";
             }
 
             return RedirectToAction("Homeworks");
         }
 
-        // 4. Сторінка "Email розсилка"
-        public IActionResult Newsletter()
+        [HttpPost]
+        public async Task<IActionResult> SendNewsletter(string targetAudience, string subject, string message)
         {
-            return View();
+            if (string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(message))
+            {
+                TempData["ErrorMessage"] = "Тема та текст повідомлення не можуть бути порожніми.";
+                return RedirectToAction("Index");
+            }
+
+            // ЗМІНА 1: Тепер збираємо об'єкти користувачів (щоб отримати їх Id для дзвіночка), а не просто тексти email-ів
+            var targetUsers = new List<Microsoft.AspNetCore.Identity.IdentityUser>();
+
+            if (targetAudience == "all")
+            {
+                targetUsers = await _context.Users.ToListAsync();
+            }
+            else if (targetAudience == "active")
+            {
+                targetUsers = await _context.Purchases
+                    .Include(p => p.User)
+                    .Select(p => p.User)
+                    .Distinct()
+                    .ToListAsync();
+            }
+            else if (targetAudience.StartsWith("course_"))
+            {
+                if (int.TryParse(targetAudience.Replace("course_", ""), out int courseId))
+                {
+                    targetUsers = await _context.Purchases
+                        .Where(p => p.CourseId == courseId)
+                        .Include(p => p.User)
+                        .Select(p => p.User)
+                        .Distinct()
+                        .ToListAsync();
+                }
+            }
+
+            // Очищаємо від користувачів без пошти
+            targetUsers = targetUsers.Where(u => u != null && !string.IsNullOrWhiteSpace(u.Email)).ToList();
+
+            if (!targetUsers.Any())
+            {
+                TempData["ErrorMessage"] = "Не знайдено жодного отримувача для цієї категорії!";
+                return RedirectToAction("Index");
+            }
+
+            int successCount = 0;
+            int errorCount = 0;
+            string lastError = "";
+
+            foreach (var user in targetUsers)
+            {
+                try
+                {
+                    // 1. ВІДПРАВЛЯЄМО EMAIL
+                    string htmlMessage = $@"
+                        <div style='font-family: Arial, sans-serif; padding: 20px; color: #333; background-color: #f4f4f4;'>
+                            <div style='background-color: #ffffff; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto;'>
+                                <h2 style='color: #0d6efd;'>Сповіщення від ITskill</h2>
+                                <p style='font-size: 16px; line-height: 1.6;'>{message.Replace("\n", "<br>")}</p>
+                                <hr style='border: none; border-top: 1px solid #eee; margin: 20px 0;' />
+                                <p style='font-size: 12px; color: #888; text-align: center;'>Ви отримали цей лист, бо є студентом ITskill.</p>
+                            </div>
+                        </div>";
+
+                    await _emailSender.SendEmailAsync(user.Email, subject, htmlMessage);
+
+                    // =======================================================
+                    // ЗМІНА 2: СТВОРЮЄМО СПОВІЩЕННЯ НА САЙТІ (ДЛЯ ДЗВІНОЧКА)
+                    // =======================================================
+                    var notification = new Notification
+                    {
+                        UserId = user.Id, // Беремо Id цього конкретного отримувача
+                        Message = $"Важливе повідомлення: {subject}",
+                        IsRead = false,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.Notifications.Add(notification);
+
+                    successCount++;
+
+                    // Пауза, щоб Google не заблокував за спам
+                    await Task.Delay(1000);
+                }
+                catch (Exception ex)
+                {
+                    errorCount++;
+                    lastError = ex.Message;
+                }
+            }
+
+            // =======================================================
+            // ЗМІНА 3: ЗБЕРІГАЄМО СПОВІЩЕННЯ В БАЗУ
+            // =======================================================
+            await _context.SaveChangesAsync();
+
+            if (errorCount == 0)
+            {
+                TempData["SuccessMessage"] = $"Розсилку успішно відправлено та створено сповіщення для {successCount} студентів! 🚀";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = $"Відправлено: {successCount}. Помилок: {errorCount}. Остання помилка: {lastError}";
+            }
+
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

@@ -1,7 +1,22 @@
-﻿@model EducationPlatform.Models.AdminDashboardViewModel
+﻿@model EducationPlatform.Models.ViewModels.AdminDashboardViewModel
 
 @{
     ViewData["Title"] = "Панель адміністратора";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+        ✅ @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+        ❌ @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
 
 <h2 class="text-white mb-4">Огляд платформи</h2>
@@ -46,26 +61,34 @@
         <h5 class="text-white mb-0">📧 Швидка Email розсилка</h5>
     </div>
     <div class="card-body p-4">
-        <form>
+        <form asp-action="SendNewsletter" method="post">
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label text-secondary">Отримувачі</label>
-                    <select class="form-select bg-dark text-white border-secondary">
-                        <option>Всі активні студенти</option>
-                        <option>Студенти курсу "C# та .NET Core"</option>
-                        <option>Студенти, які не здали домашнє завдання</option>
+                    <select name="targetAudience" class="form-select bg-dark text-white border-secondary" required>
+                        <option value="all">Всі зареєстровані студенти</option>
+                        <option value="active">Лише ті, хто має хоча б один курс</option>
+                        <optgroup label="Студенти конкретного курсу">
+                            @if (ViewBag.Courses != null)
+                            {
+                                foreach (var course in ViewBag.Courses)
+                                {
+                                    <option value="course_@course.Id">Курс: @course.Title</option>
+                                }
+                            }
+                        </optgroup>
                     </select>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label text-secondary">Тема листа</label>
-                    <input type="text" class="form-control bg-dark text-white border-secondary" placeholder="Наприклад: Оновлення програми курсу">
+                    <input type="text" name="subject" class="form-control bg-dark text-white border-secondary" placeholder="Наприклад: Оновлення програми курсу" required>
                 </div>
             </div>
             <div class="mb-3">
                 <label class="form-label text-secondary">Текст повідомлення</label>
-                <textarea class="form-control bg-dark text-white border-secondary" rows="4" placeholder="Введіть текст листа..."></textarea>
+                <textarea name="message" class="form-control bg-dark text-white border-secondary" rows="4" placeholder="Введіть текст листа..." required></textarea>
             </div>
-            <button type="button" class="btn btn-primary px-4 fw-bold">Відправити розсилку 🚀</button>
+            <button type="submit" class="btn btn-primary px-4 fw-bold" onclick="return confirm('Ви впевнені, що хочете запустити цю розсилку?');">Відправити розсилку 🚀</button>
         </form>
     </div>
 </div>

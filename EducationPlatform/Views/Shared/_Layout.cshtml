@@ -1,5 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
+@using EducationPlatform.Data
+@using Microsoft.EntityFrameworkCore
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject ApplicationDbContext _context
 
 <!DOCTYPE html>
 <html lang="uk">
@@ -32,43 +37,78 @@
                 }
             </nav>
 
+            @{
+                // Змінні для зберігання сповіщень
+                int unreadCount = 0;
+                List<EducationPlatform.Models.Notification> userNotifications = new();
+
+                if (SignInManager.IsSignedIn(User))
+                {
+                    var userId = UserManager.GetUserId(User);
+                    if (userId != null)
+                    {
+                        // Беремо 5 найсвіжіших сповіщень користувача
+                        userNotifications = await _context.Notifications
+                        .Where(n => n.UserId == userId)
+                        .OrderByDescending(n => n.CreatedAt)
+                        .Take(5)
+                        .ToListAsync();
+
+                        // Рахуємо кількість непрочитаних
+                        unreadCount = await _context.Notifications
+                        .Where(n => n.UserId == userId && !n.IsRead)
+                        .CountAsync();
+                    }
+                }
+            }
+
             <div class="right-actions d-flex align-items-center">
                 @if (SignInManager.IsSignedIn(User))
                 {
-                    <div class="dropdown notification-dropdown">
+                    <div class="dropdown notification-dropdown me-3">
                         <button class="bell-btn" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="bell-icon position-relative">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="22" height="22">
                                     <path d="M320 64C302.3 64 288 78.3 288 96L288 99.2C215 114 160 178.6 256 277.7C160 325.8 143.6 372.5 113.6 410.1L103.8 422.3C98.7 428.6 96 436.4 96 444.5C96 464.1 111.9 480 131.5 480L508.4 480C528 480 543.9 464.1 543.9 444.5C543.9 436.4 541.2 428.6 536.1 422.3L526.3 410.1C496.4 372.5 480 325.8 480 277.7L480 256C480 178.6 425 114 352 99.2L352 96C352 78.3 337.7 64 320 64zM258 528C265.1 555.6 290.2 576 320 576C349.8 576 374.9 555.6 382 528L258 528z" />
                                 </svg>
 
-                                <span class="notification-badge">2</span>
+                                @if (unreadCount > 0)
+                                {
+                                    <span class="notification-badge" id="notif-badge">@unreadCount</span>
+                                }
                             </div>
                         </button>
 
                         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-notifications" aria-labelledby="notificationDropdown">
                             <li><h6 class="dropdown-header text-center py-2">Ваші сповіщення</h6></li>
 
-                            <li>
-                                <a class="dropdown-item notification-item unread" href="#">
-                                    Доступний новий курс: "Основи C#"
-                                    <span class="notification-date">Сьогодні, 10:30</span>
-                                </a>
-                            </li>
+                            @if (userNotifications.Any())
+                            {
+                                foreach (var notif in userNotifications)
+                                {
+                                    <li>
+                                        <a class="dropdown-item notification-item @(!notif.IsRead ? "unread" : "")" href="#">
+                                            @notif.Message
+                                            <span class="notification-date">@notif.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                        </a>
+                                    </li>
+                                }
 
-                            <li>
-                                <a class="dropdown-item notification-item" href="#">
-                                    У вас відкритий новий урок у курсі Web Development.
-                                    <span class="notification-date">Вчора, 18:45</span>
-                                </a>
-                            </li>
-
-                            <li><hr class="dropdown-divider m-0"></li>
-                            <li><a class="dropdown-item text-center text-primary py-2" href="#" style="font-size: 13px;">Позначити всі як прочитані</a></li>
+                                <li><hr class="dropdown-divider m-0"></li>
+                                <li>
+                                    <button type="button" onclick="markAllAsRead()" class="dropdown-item text-center text-primary py-2 border-0 bg-transparent" style="font-size: 13px;">
+                                        Позначити всі як прочитані
+                                    </button>
+                                </li>
+                            }
+                            else
+                            {
+                                <li><span class="dropdown-item text-secondary text-center py-3">Немає сповіщень</span></li>
+                            }
                         </ul>
                     </div>
 
-                    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="nav-link p-0" title="Manage">
+                    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="nav-link p-0 profile-icon-link" title="Налаштування профілю">
                         <svg width="40" height="40" fill="currentColor" viewBox="0 0 640 640">
                             <path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z" />
                         </svg>
@@ -96,6 +136,26 @@
             &copy; 2024 - ITskill - Всі права захищено
         </div>
     </footer>
+
+    <script>
+        function markAllAsRead() {
+            // Відправляємо запит на сервер
+            fetch('/Home/MarkNotificationsAsRead', {
+                method: 'POST'
+            }).then(response => {
+                if (response.ok) {
+                    // Ховаємо червону бульбашку з цифрою
+                    const badge = document.getElementById('notif-badge');
+                    if (badge) badge.style.display = 'none';
+
+                    // Забираємо сірий фон (клас unread) у всіх елементів у списку
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                    });
+                }
+            });
+        }
+    </script>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
