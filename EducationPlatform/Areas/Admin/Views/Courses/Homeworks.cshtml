@@ -1,19 +1,25 @@
-﻿@{
+﻿@model List<EducationPlatform.Models.HomeworkSubmission>
+@{
     ViewData["Title"] = "Домашні завдання";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        ✅ @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
 
 <h2 class="text-white mb-4">📝 Перевірка завдань</h2>
 
 <ul class="nav nav-tabs border-secondary mb-4">
     <li class="nav-item">
-        <a class="nav-link active bg-dark text-white border-secondary border-bottom-0 fw-bold" href="#">Нові (3)</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-secondary border-0" href="#">Відправлені відгуки</a>
+        <a class="nav-link active bg-dark text-white border-secondary border-bottom-0 fw-bold" href="#">Нові (@Model.Count)</a>
     </li>
 </ul>
 
-<div class="card bg-dark border-secondary shadow-sm">
+<div class="card bg-dark border-secondary shadow-sm mb-5">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-dark table-hover mb-0 align-middle">
@@ -26,25 +32,49 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="px-4 py-3">
-                            <div class="text-white fw-bold">Іван Величко</div>
-                            <div class="text-secondary small">07.03.2026 14:30</div>
-                        </td>
-                        <td>
-                            <div class="text-info">Основи C#</div>
-                            <div class="text-secondary small">Урок 1: Змінні та типи</div>
-                        </td>
-                        <td>
-                            <div class="input-group input-group-sm w-75">
-                                <input type="text" class="form-control bg-dark text-secondary border-secondary" value="https://github.com/ivan/hw1" readonly>
-                                <button class="btn btn-outline-secondary" type="button">Відкрити</button>
-                            </div>
-                        </td>
-                        <td class="text-end px-4">
-                            <button class="btn btn-success fw-bold px-3" data-bs-toggle="modal" data-bs-target="#feedbackModal">💬 Залишити відгук</button>
-                        </td>
-                    </tr>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var hw in Model)
+                        {
+                            <tr>
+                                <td class="px-4 py-3">
+                                    <div class="text-white fw-bold">@(hw.User?.UserName ?? "Невідомий")</div>
+                                    <div class="text-secondary small">@hw.SubmissionDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                                </td>
+                                <td>
+                                    <div class="text-info">@hw.Lesson?.Course?.Title</div>
+                                    <div class="text-secondary small">Урок @hw.Lesson?.OrderNumber: @hw.Lesson?.Title</div>
+                                </td>
+                                <td>
+                                    <div class="input-group input-group-sm w-75">
+                                        <input type="text" class="form-control bg-dark text-secondary border-secondary" value="@hw.SolutionLink" readonly>
+                                        <a href="@hw.SolutionLink" target="_blank" class="btn btn-outline-secondary">Відкрити</a>
+                                    </div>
+                                </td>
+                                <td class="text-end px-4">
+                                    <button class="btn btn-success fw-bold px-3"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#feedbackModal"
+                                            data-hw-id="@hw.Id"
+                                            data-student-name="@hw.User?.UserName"
+                                            data-student-email="@hw.User?.Email"
+                                            data-course-name="@hw.Lesson?.Course?.Title"
+                                            data-lesson-name="Урок @hw.Lesson?.OrderNumber: @hw.Lesson?.Title">
+                                        💬 Залишити відгук
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-secondary">
+                                <span class="fs-4 d-block mb-2">🎉</span>
+                                Немає нових домашніх завдань! Ви все перевірили.
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
@@ -56,27 +86,60 @@
         <div class="modal-content bg-dark text-white border-secondary">
 
             <div class="modal-header border-secondary">
-                <h5 class="modal-title" id="feedbackModalLabel">Відгук для: Іван Величко</h5>
+                <h5 class="modal-title" id="feedbackModalLabel">Відгук для: <span id="modalStudentName" class="text-info"></span></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <div class="modal-body">
-                <p class="text-secondary mb-3">Основи C# - Урок 1: Змінні та типи</p>
+            <form asp-action="SendFeedback" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="modalSubmissionId" name="submissionId" value="" />
 
-                <div class="mb-3">
-                    <label class="form-label text-light">Повідомлення ментора</label>
-                    <textarea class="form-control bg-dark text-white border-secondary" rows="5" placeholder="Наприклад: Ти чудово попрацював зі змінними, все виконано правильно!"></textarea>
-                    <div class="form-text text-secondary mt-2">
-                        Цей текст буде відправлено студенту на email (ivan.v@gmail.com). Після відправки завдання зникне зі списку нових.
+                    <p class="text-secondary mb-3">
+                        <span id="modalCourseName"></span> - <span id="modalLessonName"></span>
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light">Повідомлення ментора</label>
+                        <textarea name="feedbackMessage" class="form-control bg-dark text-white border-secondary" rows="5" placeholder="Наприклад: Ти чудово попрацював зі змінними, все виконано правильно!" required></textarea>
+                        <div class="form-text text-secondary mt-2">
+                            Цей текст буде відправлено студенту на email (<strong id="modalStudentEmail"></strong>). Після відправки завдання зникне зі списку нових.
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="modal-footer border-secondary">
-                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Скасувати</button>
-                <button type="button" class="btn btn-primary px-4 fw-bold">Відправити на Email 🚀</button>
-            </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Скасувати</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">Відправити на Email 🚀</button>
+                </div>
+            </form>
 
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var feedbackModal = document.getElementById('feedbackModal');
+
+            feedbackModal.addEventListener('show.bs.modal', function (event) {
+                // Кнопка, яка викликала модальне вікно
+                var button = event.relatedTarget;
+
+                // Отримуємо дані з атрибутів data-*
+                var hwId = button.getAttribute('data-hw-id');
+                var studentName = button.getAttribute('data-student-name');
+                var studentEmail = button.getAttribute('data-student-email');
+                var courseName = button.getAttribute('data-course-name');
+                var lessonName = button.getAttribute('data-lesson-name');
+
+                // Вставляємо дані у відповідні поля модалки
+                feedbackModal.querySelector('#modalSubmissionId').value = hwId;
+                feedbackModal.querySelector('#modalStudentName').textContent = studentName;
+                feedbackModal.querySelector('#modalStudentEmail').textContent = studentEmail;
+                feedbackModal.querySelector('#modalCourseName').textContent = courseName;
+                feedbackModal.querySelector('#modalLessonName').textContent = lessonName;
+            });
+        });
+    </script>
+}

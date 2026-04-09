@@ -1,10 +1,18 @@
-﻿@{
+﻿@using EducationPlatform.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext _context
+
+@{
     // Наслідуємо глобальну шапку і підключення стилів сайту
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     // Визначаємо, на якому контролері і сторінці ми зараз знаходимося
     var action = ViewContext.RouteData.Values["action"]?.ToString();
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+
+    // ДОДАНО: Рахуємо неперевірені домашки в реальному часі
+    int newHomeworksCount = await _context.HomeworkSubmissions.CountAsync(h => !h.IsChecked);
+
 }
 
 <div class="container-fluid mt-4 mb-5">
@@ -29,7 +37,11 @@
                         <a asp-area="Admin" asp-controller="Courses" asp-action="Homeworks"
                            class="list-group-item list-group-item-action border-secondary d-flex justify-content-between align-items-center @(controller == "Courses" && action == "Homeworks" ? "bg-primary text-white fw-bold" : "bg-dark text-light")">
                             📝 Домашні завдання
-                            <span class="badge bg-danger rounded-pill">3</span>
+
+                            @if (newHomeworksCount > 0)
+                            {
+                                <span class="badge bg-danger rounded-pill shadow-sm">@newHomeworksCount</span>
+                            }
                         </a>
 
                         @if (User.IsInRole("SuperAdmin"))

@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EducationPlatform.Models.ViewModels;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using EducationPlatform.Services;
 
 namespace EducationPlatform.Areas.Admin.Controllers
 {
@@ -12,12 +14,13 @@ namespace EducationPlatform.Areas.Admin.Controllers
     [Authorize(Roles = "SuperAdmin, Admin")] // Надає доступ лише адміну
     public class CoursesController : Controller
     {
-
+        private readonly IEmailSender _emailSender;
         private readonly ApplicationDbContext _context;
 
-        public CoursesController(ApplicationDbContext context)
+        public CoursesController(ApplicationDbContext context, IEmailSender emailSender)
         {
             _context = context;
+            _emailSender = emailSender;
         }
 
         //Головна сторінка, дашборд
@@ -69,9 +72,67 @@ namespace EducationPlatform.Areas.Admin.Controllers
         }
 
         // 3. Сторінка "Домашні завдання"
-        public IActionResult Homeworks()
+        [HttpGet]
+        public async Task<IActionResult> Homeworks()
         {
-            return View();
+            // Дістаємо всі неперевірені домашки
+            // Підтягуємо користувача (щоб знати ім'я та email) та урок з курсом
+            var submissions = await _context.HomeworkSubmissions
+                .Include(h => h.User)
+                .Include(h => h.Lesson)
+                    .ThenInclude(l => l.Course)
+                .Where(h => !h.IsChecked)
+                .OrderBy(h => h.SubmissionDate) // Найстаріші зверху
+                .ToListAsync();
+
+            return View(submissions);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendFeedback(int submissionId, string feedbackMessage)
+        {
+            // Знаходимо домашку (підтягуємо також Урок, щоб знати його назву для листа)
+            var submission = await _context.HomeworkSubmissions
+                .Include(h => h.User)
+                .Include(h => h.Lesson) // Додали це, щоб взяти назву уроку
+                .FirstOrDefaultAsync(h => h.Id == submissionId);
+
+            if (submission != null)
+            {
+                // Позначаємо як перевірену
+                submission.IsChecked = true;
+
+                await _context.SaveChangesAsync();
+
+                string studentEmail = submission.User?.Email ?? "";
+
+                // РЕАЛЬНА ВІДПРАВКА ЛИСТА
+                if (!string.IsNullOrEmpty(studentEmail))
+                {
+                    // Формуємо тему листа
+                    string subject = $"Оцінка домашнього завдання: {submission.Lesson?.Title}";
+
+                    // Формуємо красиве HTML-тіло листа
+                    string htmlMessage = $@"
+                        <div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>
+                            <h2 style='color: #0d6efd;'>Привіт, {submission.User?.UserName}!</h2>
+                            <p>Ваш ментор перевірив домашнє завдання до уроку <strong>'{submission.Lesson?.Title}'</strong>.</p>
+                            <div style='background-color: #f8f9fa; border-left: 4px solid #0d6efd; padding: 15px; margin: 20px 0;'>
+                                <h4>Коментар ментора:</h4>
+                                <p style='font-size: 16px; font-style: italic;'>{feedbackMessage}</p>
+                            </div>
+                            <p>Продовжуйте в тому ж дусі!</p>
+                            <p>З повагою,<br>Команда <b>EducationPlatform</b></p>
+                        </div>";
+
+                    // Відправляємо!
+                    await _emailSender.SendEmailAsync(studentEmail, subject, htmlMessage);
+                }
+
+                TempData["SuccessMessage"] = $"Відгук успішно відправлено студенту на адресу {studentEmail} 🚀";
+            }
+
+            return RedirectToAction("Homeworks");
         }
 
         // 4. Сторінка "Email розсилка"
@@ -130,46 +191,6 @@ namespace EducationPlatform.Areas.Admin.Controllers
 
             ViewBag.Tags = new MultiSelectList(await _context.Tags.ToListAsync(), "Id", "Name");
             return View(model);
-        }
-
-        // ==========================================
-        // ЛОГІКА КЕРУВАННЯ УРОКАМИ
-        // ==========================================
-
-        [HttpPost]
-        public async Task<IActionResult> AddLesson(int courseId, string title, int orderNumber, string videoUrl, string homeworkDescription)
-        {
-            // Створюємо новий урок
-            var lesson = new Lesson
-            {
-                CourseId = courseId,
-                Title = title,
-                OrderNumber = orderNumber,
-                VideoUrl = videoUrl,
-                HomeworkDescription = homeworkDescription
-            };
-
-            _context.Lessons.Add(lesson);
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = "Урок успішно додано!";
-
-            // Повертаємось на цю ж сторінку редагування курсу
-            return RedirectToAction("EditCourse", new { id = courseId });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> DeleteLesson(int lessonId, int courseId)
-        {
-            var lesson = await _context.Lessons.FindAsync(lessonId);
-            if (lesson != null)
-            {
-                _context.Lessons.Remove(lesson);
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Урок успішно видалено!";
-            }
-
-            return RedirectToAction("EditCourse", new { id = courseId });
         }
 
         [HttpGet]
