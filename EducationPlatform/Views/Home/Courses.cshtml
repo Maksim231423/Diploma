@@ -94,7 +94,7 @@
                             </p>
 
                             <div class="mt-auto pt-3 border-top border-secondary text-center">
-                                <h4 class="text-primary fw-bold mb-3">@course.Price ₴</h4>
+                                <h4 class="text-primary fw-bold mb-3">@course.Price.ToString("N0") ₴</h4>
                                 <a asp-controller="Home" asp-action="CourseDetails" asp-route-id="@course.Id" class="btn btn-outline-light w-100 rounded-pill">
                                     Детальніше
                                 </a>

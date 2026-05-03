@@ -25,7 +25,7 @@
 
             <p class="lead text-white-50">@Model.Description</p>
 
-            <h2 class="text-primary my-4">@Model.Price ₴</h2>
+            <h2 class="text-primary my-4">@Model.Price.ToString("N0") ₴</h2>
 
             @if (ViewBag.IsPurchased == true)
             {
@@ -38,10 +38,10 @@
                 <form asp-controller="Payment" asp-action="Checkout" method="post">
                     <input type="hidden" name="courseId" value="@Model.Id" />
                     <input type="hidden" name="courseTitle" value="@Model.Title" />
-                    <input type="hidden" name="price" value="@Model.Price" />
+                    <input type="hidden" name="price" value="@Model.Price.ToString("N0")" />
 
                     <button type="submit" class="btn btn-lg btn-danger px-5 py-3 rounded-pill fw-bold shadow w-100">
-                        🚀 Почати навчання за @Model.Price ₴
+                        🚀 Почати навчання за @Model.Price.ToString("N0") ₴
                     </button>
                 </form>
             }

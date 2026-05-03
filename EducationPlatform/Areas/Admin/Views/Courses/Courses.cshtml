@@ -63,7 +63,7 @@
                                     }
                                 </td>
 
-                                <td class="text-success fw-bold">@course.Price ₴</td>
+                                <td class="text-success fw-bold">@course.Price.ToString("N0") ₴</td>
 
                                 <td class="actions-column text-end px-4">
                                     <a asp-action="EditCourse" asp-route-id="@course.Id" class="btn btn-sm btn-outline-info me-1" title="Редагувати">✏️</a>

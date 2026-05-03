@@ -112,7 +112,7 @@ namespace EducationPlatform.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
 
-            // 🔒 ДОДАНО: Перевіряємо, чи купив цей користувач цей курс
+            // Перевіряємо, чи купив цей користувач цей курс
             bool isPurchased = await _context.Purchases
                 .AnyAsync(p => p.CourseId == courseId && p.UserId == user.Id);
 

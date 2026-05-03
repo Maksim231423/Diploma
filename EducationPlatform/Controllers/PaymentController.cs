@@ -16,7 +16,7 @@ namespace EducationPlatform.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
 
-        // Додали базу даних та юзер-менеджер
+        // Додано базу даних та юзер-менеджер
         public PaymentController(IPaymentService paymentService, ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _paymentService = paymentService;

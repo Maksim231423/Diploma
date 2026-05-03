@@ -54,7 +54,7 @@ namespace EducationPlatform.Areas.Admin.Controllers
                 MonthlyIncome = income
             };
 
-            // ДОДАНО: Передаємо список курсів для випадаючого списку розсилки
+            // Передаємо список курсів для випадаючого списку розсилки
             ViewBag.Courses = await _context.Courses.ToListAsync();
             return View(model);
         }
@@ -160,7 +160,7 @@ namespace EducationPlatform.Areas.Admin.Controllers
                 return RedirectToAction("Index");
             }
 
-            // ЗМІНА 1: Тепер збираємо об'єкти користувачів (щоб отримати їх Id для дзвіночка), а не просто тексти email-ів
+            //Тепер збираємо об'єкти користувачів (щоб отримати їх Id для дзвіночка), а не просто тексти email-ів
             var targetUsers = new List<Microsoft.AspNetCore.Identity.IdentityUser>();
 
             if (targetAudience == "all")
@@ -218,9 +218,7 @@ namespace EducationPlatform.Areas.Admin.Controllers
 
                     await _emailSender.SendEmailAsync(user.Email, subject, htmlMessage);
 
-                    // =======================================================
-                    // ЗМІНА 2: СТВОРЮЄМО СПОВІЩЕННЯ НА САЙТІ (ДЛЯ ДЗВІНОЧКА)
-                    // =======================================================
+                    // СТВОРЮЄМО СПОВІЩЕННЯ НА САЙТІ (ДЛЯ ДЗВІНОЧКА)
                     var notification = new Notification
                     {
                         UserId = user.Id, // Беремо Id цього конкретного отримувача
@@ -242,9 +240,7 @@ namespace EducationPlatform.Areas.Admin.Controllers
                 }
             }
 
-            // =======================================================
             // ЗМІНА 3: ЗБЕРІГАЄМО СПОВІЩЕННЯ В БАЗУ
-            // =======================================================
             await _context.SaveChangesAsync();
 
             if (errorCount == 0)
@@ -283,7 +279,7 @@ namespace EducationPlatform.Areas.Admin.Controllers
         {
             var course = await _context.Courses
                 .Include(c => c.Tags)
-                .Include(c => c.Lessons) // <--- ДОДАНО: Підтягуємо уроки
+                .Include(c => c.Lessons) // Підтягуємо уроки
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (course == null) return NotFound();
@@ -296,7 +292,7 @@ namespace EducationPlatform.Areas.Admin.Controllers
                 Price = course.Price,
                 ImageUrl = course.ImageUrl,
                 SelectedTags = course.Tags.Select(t => t.Id).ToList(),
-                // ДОДАНО: Сортуємо уроки за номером і передаємо у модель
+                // Сортуємо уроки за номером і передаємо у модель
                 Lessons = course.Lessons.OrderBy(l => l.OrderNumber).Select(l => new LessonViewModel
                 {
                     Id = l.Id,
