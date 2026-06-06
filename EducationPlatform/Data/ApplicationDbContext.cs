@@ -18,5 +18,7 @@ namespace EducationPlatform.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<HomeworkSubmission> HomeworkSubmissions { get; set; }
+        public DbSet<Certificate> Certificates { get; set; }
+
     }
 }

@@ -1,0 +1,48 @@
+﻿@model EducationPlatform.Models.Certificate
+
+@{
+    ViewData["Title"] = "Перевірка сертифіката";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5 text-center mb-5">
+    @if (ViewBag.IsValid)
+    {
+        <div class="card bg-dark border-success shadow-lg mx-auto" style="max-width: 600px;">
+            <div class="card-body p-5">
+                <h1 class="text-success mb-4">✅ Сертифікат дійсний!</h1>
+
+                <!-- Виводимо Ім'я та Прізвище з таблиці Certificates -->
+                <h3 class="text-white mb-1">
+                    Студент: <strong>@Model.StudentFirstName @Model.StudentLastName</strong>
+                </h3>
+
+                <!-- Виводимо Email з прив'язаного акаунту IdentityUser -->
+                <div class="mb-4 text-secondary" style="font-size: 15px;">
+                    <div>📧 Email: @Model.User.Email</div>
+                </div>
+
+                <p class="text-secondary mt-3">Успішно завершив(ла) курс:</p>
+                <h2 class="text-info mb-4">«@Model.Course.Title»</h2>
+
+                <!-- Виводимо QR-код, щоб роботодавець міг перевірити його з іншого пристрою -->
+                <div class="mb-4">
+                    <img src="@Url.Action("GetQrCode", "Certificates", new { token = Model.UniqueToken })" alt="QR Code" class="img-thumbnail" style="width: 150px; height: 150px;" />
+                    <div class="text-secondary mt-2" style="font-size: 12px;">Відскануйте для перевірки</div>
+                </div>
+
+                <hr class="border-secondary my-4" />
+
+                <p class="text-secondary mb-1">Дата видачі: @Model.IssueDate.ToString("dd.MM.yyyy")</p>
+                <p class="text-secondary m-0" style="font-size: 12px;">ID Сертифіката: @Model.UniqueToken</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger shadow-lg" style="max-width: 600px; margin: auto;">
+            <h2>❌ Помилка перевірки</h2>
+            <p>Цей сертифікат не знайдено в базі даних платформи ITskill. Можливо, він недійсний або посилання пошкоджене.</p>
+        </div>
+    }
+</div>

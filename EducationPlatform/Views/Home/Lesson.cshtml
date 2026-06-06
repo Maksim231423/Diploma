@@ -137,12 +137,79 @@
                 }
                 else
                 {
-                    <a asp-controller="Home" asp-action="CourseDetails" asp-route-id="@Model.CourseId" class="btn btn-success px-4 py-2 fw-bold shadow-sm">
-                        🎓 Завершити курс
-                    </a>
+                    <!-- ЛОГІКА СЕРТИФІКАТІВ -->
+                    @if (ViewBag.CertificateToken != null)
+                    {
+                        <!-- Дані вже є, сертифікат створено. Показуємо пряме посилання -->
+                        <a asp-controller="Certificates" asp-action="Verify" asp-route-token="@ViewBag.CertificateToken" class="btn btn-info px-4 py-2 fw-bold shadow-sm text-white" target="_blank">
+                            🎓 Переглянути мій сертифікат
+                        </a>
+                    }
+                    else if (ViewBag.AllHomeworksCompleted == true)
+                    {
+                        <!-- Домашки здані, але сертифіката ще немає. Відкриваємо форму для імені -->
+                        <button type="button" class="btn btn-success px-4 py-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#certificateModal">
+                            🎓 Отримати сертифікат
+                        </button>
+                    }
+                    else
+                    {
+                        <!--Домашки НЕ здані, Кнопка неактивна з підказкою -->
+                        <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="Будь ласка, здайте всі домашні завдання, щоб отримати сертифікат">
+                            <button class="btn btn-secondary px-4 py-2 fw-bold shadow-sm" type="button" disabled style="pointer-events: none;">
+                                🎓 Отримати сертифікат
+                            </button>
+                        </span>
+                    }
                 }
             </div>
 
         </div>
     </div>
 </div>
+
+<!-- Модальне вікно для даних сертифіката -->
+<div class="modal fade" id="certificateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">🎓 Отримання сертифіката</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- Форма відправляє дані на метод IssueCertificate -->
+            <form asp-controller="Certificates" asp-action="IssueCertificate" method="post">
+                <div class="modal-body p-4">
+                    <p class="text-secondary mb-4">Вітаємо із завершенням курсу! Введіть ваші дані так, як вони мають відображатися на офіційному сертифікаті.</p>
+
+                    <!-- Передаємо ID курсу, щоб контролер знав, за що видавати сертифікат -->
+                    <input type="hidden" name="courseId" value="@Model.CourseId" />
+
+                    <div class="mb-3">
+                        <label class="form-label text-secondary">Ім'я</label>
+                        <input type="text" name="firstName" class="form-control bg-dark text-white border-secondary" required placeholder="Наприклад: Іван" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-secondary">Прізвище</label>
+                        <input type="text" name="lastName" class="form-control bg-dark text-white border-secondary" required placeholder="Наприклад: Петренко" />
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Скасувати</button>
+                    <button type="submit" class="btn btn-success fw-bold">Отримати сертифікат</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Ініціалізація всіх тултипів Bootstrap на сторінці
+        document.addEventListener("DOMContentLoaded", function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
+    </script>
+}

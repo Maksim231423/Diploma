@@ -25,6 +25,7 @@ namespace EducationPlatform.Controllers
             // Додаємо .Include(c => c.Tags), щоб база даних одразу віддала нам і теги також
             var courses = await _context.Courses
                 .Include(c => c.Tags)
+                .AsNoTracking()
                 .ToListAsync();
 
             return View(courses);
@@ -177,6 +178,45 @@ namespace EducationPlatform.Controllers
             // Передаємо Id наступного уроку (якщо він є) у ViewBag
             ViewBag.NextLessonId = nextLesson?.Id;
 
+
+            // Отримуємо ID поточного користувача
+            var userId = _userManager.GetUserId(User);
+            bool allHomeworksCompleted = true; // За замовчуванням true (на випадок, якщо домашок взагалі немає)
+
+            if (userId != null)
+            {
+                // 1. Шукаємо всі уроки в ЦЬОМУ курсі, де Є домашнє завдання
+                var lessonsWithHomework = await _context.Lessons
+                    .Where(l => l.CourseId == lesson.CourseId && !string.IsNullOrEmpty(l.HomeworkDescription))
+                    .Select(l => l.Id)
+                    .ToListAsync();
+
+                if (lessonsWithHomework.Any())
+                {
+                    // 2. Шукаємо всі здані домашки ЦЬОГО користувача для ЦИХ уроків
+                    var userSubmissions = await _context.HomeworkSubmissions
+                        .Where(h => h.UserId == userId && lessonsWithHomework.Contains(h.LessonId))
+                        .Select(h => h.LessonId)
+                        .Distinct()
+                        .ToListAsync();
+
+                    // 3. Якщо кількість уроків з домашками співпадає з кількістю зданих робіт — все ок!
+                    allHomeworksCompleted = lessonsWithHomework.Count == userSubmissions.Count;
+                }
+
+                var existingCertificate = await _context.Certificates
+                .FirstOrDefaultAsync(c => c.UserId == userId && c.CourseId == lesson.CourseId);
+
+                if (existingCertificate != null)
+                {
+                    // Якщо сертифікат є, передаємо його унікальний токен на сторінку
+                    ViewBag.CertificateToken = existingCertificate.UniqueToken;
+                }
+            }
+
+            // Передаємо результат у View
+            ViewBag.AllHomeworksCompleted = allHomeworksCompleted;
+
             return View(lesson);
         }
 
@@ -245,5 +285,6 @@ namespace EducationPlatform.Controllers
             await context.SaveChangesAsync();
             return Ok();
         }
+
     }
 }
