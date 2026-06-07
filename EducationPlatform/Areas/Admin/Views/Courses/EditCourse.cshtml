@@ -78,8 +78,12 @@
                                                 <input type="hidden" class="lesson-id" name="Lessons[@i].Id" value="@Model.Lessons[i].Id" />
                                                 <input type="hidden" class="lesson-order" name="Lessons[@i].OrderNumber" value="@Model.Lessons[i].OrderNumber" />
                                                 <input type="hidden" class="lesson-title" name="Lessons[@i].Title" value="@Model.Lessons[i].Title" />
+
+                                                <input type="hidden" class="lesson-content" name="Lessons[@i].Content" value="@Model.Lessons[i].Content" />
+                                                <input type="hidden" class="lesson-objectives" name="Lessons[@i].LearningObjectives" value="@Model.Lessons[i].LearningObjectives" />
                                                 <input type="hidden" class="lesson-video" name="Lessons[@i].VideoUrl" value="@Model.Lessons[i].VideoUrl" />
                                                 <input type="hidden" class="lesson-hw" name="Lessons[@i].HomeworkDescription" value="@Model.Lessons[i].HomeworkDescription" />
+
                                                 <span class="display-order">@Model.Lessons[i].OrderNumber</span>
                                             </td>
                                             <td class="text-white display-title">@Model.Lessons[i].Title</td>
@@ -123,16 +127,26 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <label class="form-label text-secondary">Назва уроку *</label>
-                        <input type="text" id="modalTitle" class="form-control bg-dark text-white border-secondary" />
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label text-secondary">Назва уроку *</label>
+                    <input type="text" id="modalTitle" class="form-control bg-dark text-white border-secondary" />
                 </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-secondary">Короткий опис уроку (Контент)</label>
+                    <textarea id="modalContent" class="form-control bg-dark text-white border-secondary" rows="3"></textarea>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label text-secondary">URL відео</label>
                     <input type="url" id="modalVideo" class="form-control bg-dark text-white border-secondary" />
                 </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-secondary">Що ви навчитеся (кожен пункт з нового рядка)</label>
+                    <textarea id="modalObjectives" class="form-control bg-dark text-white border-secondary" rows="3"></textarea>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label text-secondary">Домашнє завдання (опціонально)</label>
                     <textarea id="modalHw" class="form-control bg-dark text-white border-secondary" rows="3"></textarea>
@@ -150,18 +164,22 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         // Відкриває модалку та очищає її поля
-        function openLessonModal() {
+                function openLessonModal() {
             document.getElementById('modalTitle').value = '';
+            document.getElementById('modalContent').value = ''; 
             document.getElementById('modalVideo').value = '';
+            document.getElementById('modalObjectives').value = ''; 
             document.getElementById('modalHw').value = '';
             var myModal = new bootstrap.Modal(document.getElementById('addLessonModal'));
             myModal.show();
         }
 
         // Забирає дані з модалки і малює новий рядок у HTML-таблиці
-        function saveLessonToTable() {
+            function saveLessonToTable() {
             const title = document.getElementById('modalTitle').value;
+            const content = document.getElementById('modalContent').value;
             const video = document.getElementById('modalVideo').value;
+            const objectives = document.getElementById('modalObjectives').value;
             const hw = document.getElementById('modalHw').value;
 
             if (!title) { alert('Введіть назву уроку!'); return; }
@@ -170,13 +188,14 @@
             const tr = document.createElement('tr');
             tr.className = 'lesson-row';
 
-            // Створюємо HTML-код нового рядка (поки без правильних індексів, ми їх оновимо нижче)
             tr.innerHTML = `
                 <td class="px-4 text-center text-warning fw-bold">
                     <input type="hidden" class="lesson-id" value="0" />
                     <input type="hidden" class="lesson-order" value="0" />
                     <input type="hidden" class="lesson-title" value="${title}" />
+                    <input type="hidden" class="lesson-content" value="${content}" />
                     <input type="hidden" class="lesson-video" value="${video}" />
+                    <input type="hidden" class="lesson-objectives" value="${objectives}" />
                     <input type="hidden" class="lesson-hw" value="${hw}" />
                     <span class="display-order">0</span>
                 </td>
@@ -188,12 +207,11 @@
                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeLessonRow(this)">🗑️</button>
                 </td>
             `;
-
             tbody.appendChild(tr);
-            recalculateIndices(); // Присвоюємо правильні номери і name-атрибути
 
-            // Закриваємо модалку
-            bootstrap.Modal.getInstance(document.getElementById('addLessonModal')).hide();
+            recalculateIndices();
+
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('addLessonModal')).hide();
         }
 
         // Видаляє рядок (тільки з екрану)
@@ -202,20 +220,36 @@
             recalculateIndices();
         }
 
-        // НАЙВАЖЛИВІША ФУНКЦІЯ: Оновлює порядкові номери і атрибути "name", щоб ASP.NET зрозумів масив
-        function recalculateIndices() {
+        // Оновлює порядкові номери і атрибути "name", щоб ASP.NET зрозумів масив
+                function recalculateIndices() {
             const rows = document.querySelectorAll('#lessonsBody tr.lesson-row');
             rows.forEach((row, index) => {
-                // Візуальні номери (1, 2, 3...)
-                row.querySelector('.display-order').textContent = index + 1;
-                row.querySelector('.lesson-order').value = index + 1;
+                let orderDisplay = row.querySelector('.display-order');
+                if(orderDisplay) orderDisplay.textContent = index + 1;
 
-                // Атрибути name для C# контролера (Lessons[0].Title, Lessons[1].Title...)
-                row.querySelector('.lesson-id').name = `Lessons[${index}].Id`;
-                row.querySelector('.lesson-order').name = `Lessons[${index}].OrderNumber`;
-                row.querySelector('.lesson-title').name = `Lessons[${index}].Title`;
-                row.querySelector('.lesson-video').name = `Lessons[${index}].VideoUrl`;
-                row.querySelector('.lesson-hw').name = `Lessons[${index}].HomeworkDescription`;
+                let orderInput = row.querySelector('.lesson-order');
+                if (orderInput) {
+                    orderInput.value = index + 1;
+                    orderInput.name = `Lessons[${index}].OrderNumber`;
+                }
+
+                let idInput = row.querySelector('.lesson-id');
+                if(idInput) idInput.name = `Lessons[${index}].Id`;
+
+                let titleInput = row.querySelector('.lesson-title');
+                if(titleInput) titleInput.name = `Lessons[${index}].Title`;
+
+                let contentInput = row.querySelector('.lesson-content');
+                if(contentInput) contentInput.name = `Lessons[${index}].Content`;
+
+                let videoInput = row.querySelector('.lesson-video');
+                if(videoInput) videoInput.name = `Lessons[${index}].VideoUrl`;
+
+                let objInput = row.querySelector('.lesson-objectives');
+                if(objInput) objInput.name = `Lessons[${index}].LearningObjectives`;
+
+                let hwInput = row.querySelector('.lesson-hw');
+                if(hwInput) hwInput.name = `Lessons[${index}].HomeworkDescription`;
             });
         }
     </script>

@@ -33,7 +33,7 @@ namespace EducationPlatform.Controllers
 
         public async Task<IActionResult> Courses(string searchQuery, string selectedTags)
         {
-            var query = _context.Courses.Include(c => c.Tags).AsQueryable();
+            var query = _context.Courses.Include(c => c.Tags).AsNoTracking().AsQueryable();
 
             // Перетворюємо рядок "C#,SQL" назад у список ["C#", "SQL"]
             var tagsList = new List<string>();

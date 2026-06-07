@@ -35,8 +35,8 @@
             </div>
         </div>
 
-        <div class="mt-4">
-            <span class="text-secondary me-3">Фільтр по тегам:</span>
+        <div class="mt-4 d-flex flex-wrap justify-content-center align-items-center gap-2">
+            <span class="text-secondary">Фільтр по тегам:</span>
 
             @if (ViewBag.AllTags != null)
             {
@@ -54,7 +54,7 @@
                     <a asp-action="Courses"
                        asp-route-searchQuery="@ViewBag.SearchQuery"
                        asp-route-selectedTags="@string.Join(",", newTagsList)"
-                       class="badge @bgClass me-2 p-2 border border-secondary text-decoration-none" style="cursor: pointer;">
+                       class="badge @bgClass p-2 border border-secondary text-decoration-none shadow-sm" style="cursor: pointer; font-size: 0.9rem;">
                         #@(isSelected ? "✓ " : "")@t
                     </a>
                 }

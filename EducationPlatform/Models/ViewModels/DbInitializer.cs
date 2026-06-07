@@ -9,7 +9,7 @@ namespace EducationPlatform.Models.ViewModels
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
-            // 1. Створюємо ТРИ ролі
+            // 1. Створюємо ролі
             string[] roleNames = { "SuperAdmin", "Admin", "Student" };
             foreach (var roleName in roleNames)
             {

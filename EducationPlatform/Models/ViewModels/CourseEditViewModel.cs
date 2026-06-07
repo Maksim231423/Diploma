@@ -11,11 +11,11 @@ namespace EducationPlatform.Models.ViewModels
         public string ImageUrl { get; set; }
         public List<int> SelectedTags { get; set; } = new();
 
-        // ЗМІНЕНО: Тепер ми використовуємо спеціальну DTO модель для уроків
+        // використовуємо спеціальну DTO модель для уроків
         public List<LessonViewModel> Lessons { get; set; } = new();
     }
 
-    // ДОДАНО: Спеціальний клас для збору даних з таблиці уроків
+    // Спеціальний клас для збору даних з таблиці уроків
     public class LessonViewModel
     {
         public int Id { get; set; } // Якщо 0 - значить це новий урок
@@ -23,5 +23,8 @@ namespace EducationPlatform.Models.ViewModels
         public int OrderNumber { get; set; }
         public string VideoUrl { get; set; }
         public string HomeworkDescription { get; set; }
+
+        public string Content { get; set; }
+        public string LearningObjectives { get; set; }
     }
 }

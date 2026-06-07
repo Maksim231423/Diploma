@@ -349,12 +349,14 @@ namespace EducationPlatform.Areas.Admin.Controllers
                 newCourse.Tags = await _context.Tags.Where(t => input.SelectedTags.Contains(t.Id)).ToListAsync();
             }
 
-            // ДОДАНО: Відразу зберігаємо всі створені в таблиці уроки
+            // Відразу зберігаємо всі створені в таблиці уроки
             if (input.Lessons != null && input.Lessons.Any())
             {
                 newCourse.Lessons = input.Lessons.Select(l => new Lesson
                 {
                     Title = l.Title,
+                    Content = l.Content,
+                    LearningObjectives = l.LearningObjectives,
                     OrderNumber = l.OrderNumber,
                     VideoUrl = l.VideoUrl,
                     HomeworkDescription = l.HomeworkDescription
@@ -387,7 +389,7 @@ namespace EducationPlatform.Areas.Admin.Controllers
 
             course.Tags = await _context.Tags.Where(t => input.SelectedTags.Contains(t.Id)).ToListAsync();
 
-            // ДОДАНО: Синхронізація уроків (Smart Update)
+            // Синхронізація уроків (Smart Update)
             var incomingIds = input.Lessons?.Select(l => l.Id).ToList() ?? new List<int>();
 
             // 1. Видаляємо з бази ті уроки, які адмін видалив з таблиці на фронтенді
@@ -404,6 +406,8 @@ namespace EducationPlatform.Areas.Admin.Controllers
                         course.Lessons.Add(new Lesson
                         {
                             Title = item.Title,
+                            Content = item.Content,
+                            LearningObjectives = item.LearningObjectives,
                             OrderNumber = item.OrderNumber,
                             VideoUrl = item.VideoUrl,
                             HomeworkDescription = item.HomeworkDescription
@@ -415,6 +419,8 @@ namespace EducationPlatform.Areas.Admin.Controllers
                         if (existing != null)
                         {
                             existing.Title = item.Title;
+                            existing.Content = item.Content; // ДОДАНО
+                            existing.LearningObjectives = item.LearningObjectives; // ДОДАНО
                             existing.OrderNumber = item.OrderNumber;
                             existing.VideoUrl = item.VideoUrl;
                             existing.HomeworkDescription = item.HomeworkDescription;
