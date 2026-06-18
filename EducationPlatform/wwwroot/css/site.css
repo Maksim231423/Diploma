@@ -304,3 +304,74 @@ footer {
     .actions-column .btn {
         margin: 0;
     }
+
+
+
+
+/* Базові стилі для світлої теми */
+body.light-mode {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+    /* Перебиваємо темні картки, інпути та блоки */
+    body.light-mode .bg-dark {
+        background-color: #ffffff !important;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    }
+
+    /* Змінюємо білий текст на темний */
+    body.light-mode .text-white {
+        color: #212529 !important;
+    }
+
+    body.light-mode .text-secondary {
+        color: #6c757d !important;
+    }
+
+    /* Змінюємо колір рамок */
+    body.light-mode .border-secondary {
+        border-color: #dee2e6 !important;
+    }
+
+    /* Стилі для таблиць в адмінці */
+    body.light-mode .table-dark {
+        --bs-table-bg: #ffffff;
+        --bs-table-color: #212529;
+        --bs-table-border-color: #dee2e6;
+        color: #212529 !important;
+    }
+
+    body.light-mode .table-active {
+        --bs-table-active-bg: #f8f9fa;
+    }
+
+
+    /* 1. Виправляємо кнопки зі світлим контуром (наприклад, кнопка "Детальніше" або профіль) */
+    body.light-mode .btn-outline-light {
+        color: #212529 !important;
+        border-color: #212529 !important;
+    }
+
+        body.light-mode .btn-outline-light:hover {
+            background-color: #212529 !important;
+            color: #ffffff !important;
+        }
+
+    /* 2. Виправляємо текст у навігації (наприклад, "Привіт, maksim!") */
+    body.light-mode .navbar .nav-link,
+    body.light-mode .navbar .navbar-brand,
+    body.light-mode .navbar-text {
+        color: #212529 !important;
+    }
+
+        /* Колір при наведенні мишки на посилання в навігації */
+        body.light-mode .navbar .nav-link:hover {
+            color: #0d6efd !important; /* Синій колір Bootstrap */
+        }
+
+    /* 3. Якщо іконка дзвіночка має білий колір, робимо її темною */
+    body.light-mode .bi-bell,
+    body.light-mode .bi-bell-fill {
+        color: #212529 !important;
+    }

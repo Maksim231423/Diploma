@@ -1,7 +1,7 @@
 ﻿using EducationPlatform.Data;
 using EducationPlatform.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity; // Додали для роботи з користувачами
+using Microsoft.AspNetCore.Identity; // Для роботи з користувачами
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;

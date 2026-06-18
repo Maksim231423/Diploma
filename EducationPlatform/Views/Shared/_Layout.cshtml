@@ -63,6 +63,9 @@
             }
 
             <div class="right-actions d-flex align-items-center">
+                <button id="theme-toggle" class="btn btn-outline-secondary rounded-circle p-2 me-3" title="Змінити тему">
+                    <span id="theme-icon">☀️</span>
+                </button>
                 @if (SignInManager.IsSignedIn(User))
                 {
                     <div class="dropdown notification-dropdown me-3">
@@ -155,7 +158,39 @@
                 }
             });
         }
+
+                document.addEventListener("DOMContentLoaded", function () {
+            const themeToggleBtn = document.getElementById("theme-toggle");
+            const themeIcon = document.getElementById("theme-icon");
+            const body = document.body;
+
+            // Перевіряємо, чи є вже збережена тема
+            const currentTheme = localStorage.getItem("theme");
+
+            // Якщо раніше була обрана світла тема — вмикаємо її
+            if (currentTheme === "light") {
+                body.classList.add("light-mode");
+                themeIcon.textContent = "🌙";
+            }
+
+            // Обробник кліку по кнопці
+            themeToggleBtn.addEventListener("click", function () {
+                body.classList.toggle("light-mode");
+
+                let theme = "dark";
+                if (body.classList.contains("light-mode")) {
+                    theme = "light";
+                    themeIcon.textContent = "🌙";
+                } else {
+                    themeIcon.textContent = "☀️";
+                }
+
+                // Зберігаємо вибір користувача
+                localStorage.setItem("theme", theme);
+            });
+        });
     </script>
+
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

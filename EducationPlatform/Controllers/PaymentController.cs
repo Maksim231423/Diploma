@@ -29,8 +29,7 @@ namespace EducationPlatform.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-            // 1. Формуємо OrderId. ТЕПЕР МИ ДОДАЄМО ТУДИ USER ID!
-            // Виглядатиме так: ORDER_5_d3b4..._випадковийХеш
+            // 1. Формуємо OrderId. ТЕПЕР МИ ДОДАЄМО ТУДИ USER ID
             string orderId = $"ORDER_{courseId}_{user.Id}_{Guid.NewGuid().ToString().Substring(0, 8)}";
 
             string description = $"Оплата курсу: {courseTitle} на платформі ITskill";
@@ -83,8 +82,7 @@ namespace EducationPlatform.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Callback([FromForm] string data, [FromForm] string signature)
         {
-            // Цей метод ми залишаємо "для галочки" на захист диплома.
-            // Можеш сказати комісії: "Для реального хостингу в мене готовий Webhook Callback, 
+            // Для реального хостингу в мене готовий Webhook Callback, 
             // але для локального тестування запис йде через Success-редірект".
             return Ok();
         }

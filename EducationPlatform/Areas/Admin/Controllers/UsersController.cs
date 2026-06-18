@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace EducationPlatform.Areas.Admin.Controllers // Зверни увагу на namespace
+namespace EducationPlatform.Areas.Admin.Controllers 
 {
     [Area("Admin")]
-    [Authorize(Roles = "SuperAdmin")] // Доступ ТІЛЬКИ для тебе
+    [Authorize(Roles = "SuperAdmin")] // Доступ ТІЛЬКИ для головного
     public class UsersController : Controller
     {
         private readonly UserManager<IdentityUser> _userManager;
@@ -37,7 +37,7 @@ namespace EducationPlatform.Areas.Admin.Controllers // Зверни увагу �
             return View(userRolesList);
         }
 
-        // Метод для надання прав Admin (Викладача)
+        // Метод для надання прав Admin
         [HttpPost]
         public async Task<IActionResult> AddAdminRole(string userId)
         {

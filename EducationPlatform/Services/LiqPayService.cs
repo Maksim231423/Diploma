@@ -13,7 +13,7 @@ namespace EducationPlatform.Services
 
         public LiqPayService(IConfiguration config)
         {
-            // Тепер програма братиме твої реальні ключі sandbox_i73072839311 з файлу appsettings.json
+            // Програма братиме твої реальні ключі з файлу appsettings.json
             _publicKey = config.GetSection("LiqPay:PublicKey").Value;
             _privateKey = config.GetSection("LiqPay:PrivateKey").Value;
         }

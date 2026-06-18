@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "Каталог курсів";
 
-    // 1. ОГОЛОШУЄМО ЗМІННІ НА САМОМУ ВЕРХУ, щоб вся сторінка їх бачила
+    // ОГОЛОШУЄМО ЗМІННІ НА САМОМУ ВЕРХУ, щоб вся сторінка їх бачила
     var currentTags = ViewBag.SelectedTags as List<string> ?? new List<string>();
     bool hasSearchOrTags = !string.IsNullOrEmpty(ViewBag.SearchQuery) || currentTags.Any();
 }
@@ -42,7 +42,7 @@
             {
                 foreach (var t in ViewBag.AllTags as List<string>)
                 {
-                    // Перевіряємо, чи є цей тег у списку обраних (тепер currentTags доступна!)
+                    // Перевіряємо, чи є цей тег у списку обраних (тепер currentTags доступний)
                     bool isSelected = currentTags.Contains(t);
                     var bgClass = isSelected ? "bg-primary text-white" : "bg-secondary text-white";
 

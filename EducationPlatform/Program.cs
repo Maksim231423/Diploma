@@ -25,17 +25,16 @@ namespace EducationPlatform
                 // ДОЗВОЛЯЄМО ПЕВНІ СИМВОЛИ В ІМЕНІ
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
             })
-                .AddRoles<IdentityRole>() // Важливо для роботи ролей
+                .AddRoles<IdentityRole>() // для роботи ролей
                 .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders() // <--- Цей метод сам додає всі потрібні генератори кодів (включно з Email)
+                .AddDefaultTokenProviders() // Цей метод сам додає всі потрібні генератори кодів (включно з Email)
                 .AddErrorDescriber<EducationPlatform.Services.CustomIdentityErrorDescriber>();
             builder.Services.AddControllersWithViews();
 
             //Тепер є сервіс для відправкли листа, який використовує клас EmailSender
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-
-            // ДОДАЄМО НАШ ПЛАТІЖНИЙ СЕРВІС
+            // ДОДАЮ ПЛАТІЖНИЙ СЕРВІС
             builder.Services.AddTransient<IPaymentService, LiqPayService>();
 
             var app = builder.Build();
@@ -59,17 +58,15 @@ namespace EducationPlatform
 
             app.UseAuthorization();
 
-            // 1. ������� ��� ��̲��� (�� ���� ������!)
             app.MapControllerRoute(
                 name: "areas",
                 pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
-            // 2. ������� ��� ���������� ����� (�� ���� ������)
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            app.MapRazorPages(); // �� ��� Identity (Login/Register), �� �������
+            app.MapRazorPages(); // Identity (Login/Register),
 
 
             // Автоматичне створення ролей та Адміна при запуску

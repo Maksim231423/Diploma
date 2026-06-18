@@ -61,7 +61,7 @@ namespace EducationPlatform.Areas.Admin.Controllers
 
         // ГОЛОВНА СТОРІНКА УПРАВЛІННЯ КУРСАМИ
         [HttpGet]
-        public async Task<IActionResult> Courses() // Назва має збігатися з asp-action="Courses"
+        public async Task<IActionResult> Courses()
         {
             // 1. Дістаємо курси з бази разом з уроками та тегами
             var courses = await _context.Courses
@@ -104,9 +104,7 @@ namespace EducationPlatform.Areas.Admin.Controllers
                 // 1. Позначаємо завдання як перевірене
                 submission.IsChecked = true;
 
-                // =======================================================
                 // 2. ДОДАЄМО СПОВІЩЕННЯ НА САЙТІ (ДЛЯ ДЗВІНОЧКА)
-                // =======================================================
                 if (submission.User != null)
                 {
                     var notification = new Notification
