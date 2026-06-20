@@ -12,7 +12,7 @@ body {
     flex-direction: column;
 }
 
-/* --- ХЕДЕР (НОВА СТРУКТУРА) --- */
+/* --- ХЕДЕР --- */
 header {
     background: #16161c;
     border-bottom: 3px solid #FF6347; /* Помаранчева лінія */
@@ -196,7 +196,7 @@ footer {
     border-top: 1px solid #333;
 }
 
-/* --- АДАПТИВНІСТЬ (Для мобілок) --- */
+/* --- АДАПТИВНІСТЬ (Для моб) --- */
 @media (max-width: 900px) {
     header {
         height: auto;
@@ -209,7 +209,7 @@ footer {
     }
 
     .center-nav {
-        position: static; /* Скасовуємо центрування для мобілки */
+        position: static; /* Скасовуємо центрування для моб */
         transform: none;
         order: 2; /* Ставимо меню після логотипу */
     }
