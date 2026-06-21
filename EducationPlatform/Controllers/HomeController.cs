@@ -22,13 +22,18 @@ namespace EducationPlatform.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Додаємо .Include(c => c.Tags), щоб база даних одразу віддала нам і теги також
-            var courses = await _context.Courses
-                .Include(c => c.Tags)
-                .AsNoTracking()
+            var popularCourses = await _context.Courses
+                .Include(c => c.Tags) // Підвантажуємо теги для відображення у картках
+
+                // Сортуємо курси за кількістю пов'язаних записів у таблиці Purchases (кількість продажів)
+                // OrderByDescending сортує від більшого до меншого
+                .OrderByDescending(c => _context.Purchases.Count(p => p.CourseId == c.Id))
+
+                .Take(3) // Беремо перші 3 курси 
+                .AsNoTracking() // вимикаємо відстеження змін, оскільки дані йдуть тільки на читання (Read-Only)
                 .ToListAsync();
 
-            return View(courses);
+            return View(popularCourses); 
         }
 
         public async Task<IActionResult> Courses(string searchQuery, string selectedTags)
