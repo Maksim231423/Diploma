@@ -41,6 +41,7 @@ namespace EducationPlatform.Services
             string signString = _privateKey + data + _privateKey;
             string signature;
 
+            // створює об'єкт для хешування
             using (var sha1 = SHA1.Create())
             {
                 byte[] hashBytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(signString));

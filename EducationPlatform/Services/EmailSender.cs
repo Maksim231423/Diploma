@@ -23,8 +23,9 @@ namespace EducationPlatform.Services
 
             var client = new SmtpClient("smtp.gmail.com", 587)
             {
-                EnableSsl = true,
+                EnableSsl = true, // Вмикаємо шифрування
                 Credentials = new NetworkCredential(senderEmail, senderPassword)
+                // Авторизуємося в нашому Gmail
             };
 
             var mailMessage = new MailMessage

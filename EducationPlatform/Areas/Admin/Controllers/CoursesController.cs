@@ -137,7 +137,7 @@ namespace EducationPlatform.Areas.Admin.Controllers
                             </div>
                             <p>Ви можете перевірити деталі в особистому кабінеті на сайті.</p>
                             <p>Продовжуйте в тому ж дусі!</p>
-                            <p>З повагою,<br>Команда <b>EducationPlatform</b></p>
+                            <p>З повагою,<br>Команда <b>ITskill</b></p>
                         </div>";
 
                     await _emailSender.SendEmailAsync(studentEmail, subject, htmlMessage);
@@ -165,7 +165,7 @@ namespace EducationPlatform.Areas.Admin.Controllers
             {
                 targetUsers = await _context.Users.ToListAsync();
             }
-            else if (targetAudience == "active")
+            else if (targetAudience == "active") //тим в кого є хоча б один курс
             {
                 targetUsers = await _context.Purchases
                     .Include(p => p.User)
