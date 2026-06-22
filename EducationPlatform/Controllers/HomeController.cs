@@ -246,10 +246,30 @@ namespace EducationPlatform.Controllers
             if (string.IsNullOrWhiteSpace(solutionLink))
             {
                 // Якщо пусте - повертаємо назад
+                TempData["HomeworkError"] = "Посилання не може бути порожнім!";
                 return RedirectToAction("Lesson", new { id = lessonId });
             }
 
-            // 3. Створюємо новий запис для бази даних
+            // 3. Перевірка посилання (URL) ТА ЧИ ЦЕ GITHUB/DRIVE
+            // TryCreate спробує перетворити текст у справжнє посилання (URL)
+            bool isValidUrl = Uri.TryCreate(solutionLink, UriKind.Absolute, out Uri uriResult)
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+
+            if (!isValidUrl)
+            {
+                TempData["HomeworkError"] = "Будь ласка, введіть коректне посилання (починаючи з http:// або https://).";
+                return RedirectToAction("Lesson", new { id = lessonId });
+            }
+
+            // Перевіряємо домен (Host)
+            string host = uriResult.Host.ToLower();
+            if (!host.Contains("github.com") && !host.Contains("drive.google.com"))
+            {
+                TempData["HomeworkError"] = "Домашнє завдання приймається лише у вигляді посилання на GitHub або Google Drive!";
+                return RedirectToAction("Lesson", new { id = lessonId });
+            }
+
+            // 4. Створюємо новий запис для бази даних
             var submission = new HomeworkSubmission
             {
                 LessonId = lessonId,
