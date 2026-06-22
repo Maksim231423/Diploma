@@ -308,6 +308,23 @@ namespace EducationPlatform.Controllers
             }
 
             await context.SaveChangesAsync();
+            // Дістаємо всі сповіщення цього користувача, сортуючи від найновіших до старих
+            var allUserNotifs = await context.Notifications
+                .Where(n => n.UserId == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+
+            // Якщо сповіщень більше ніж 5, зайві треба видалити
+            if (allUserNotifs.Count > 5)
+            {
+                // Пропускаємо перші 5 (найновіші), а всі інші беремо у список на видалення
+                var notifsToDelete = allUserNotifs.Skip(5).ToList();
+
+                // Видаляємо старі сповіщення з бази даних
+                context.Notifications.RemoveRange(notifsToDelete);
+                await context.SaveChangesAsync();
+            }
+
             return Ok();
         }
 
